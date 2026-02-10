@@ -1,0 +1,81 @@
+plugins {
+	id 'application'
+}
+
+application {
+	mainClass = 'de.signaliduna.elpa.hint.HintApplication'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+ext {
+	set('mapstructVersion', "1.6.3")
+	set('springaddonsOidcVersion', "9.1.0")
+}
+
+compileJava {
+	options.compilerArgs += [
+		'-Amapstruct.defaultComponentModel=spring',
+		'-Amapstruct.defaultInjectionStrategy=constructor',
+	]
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+dependencies {
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+
+	// elpa
+	implementation project(":hint-model")
+	//spring starter
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-aspectj' // optional: zum Einsatz der micrometer-Annotationen
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics'
+	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+	implementation'org.springframework.boot:spring-boot-starter-validation'
+	//spring cloud
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	// others
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+	implementation 'io.github.springwolf:springwolf-kafka:2.0.0'
+	implementation "com.c4-soft.springaddons:spring-addons-starter-oidc:${springaddonsOidcVersion}"
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	implementation('net.logstash.logback:logstash-logback-encoder:9.0') {
+		// Provided by Spring Boot
+		exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+	}
+	implementation 'org.bitbucket.b_c:jose4j:0.9.6'
+	// test
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
+	testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'org.testcontainers:testcontainers-postgresql'
+
+	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.0.9'
+
+	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
+	testImplementation "com.c4-soft.springaddons:spring-addons-starter-oidc-test:${springaddonsOidcVersion}"
+}

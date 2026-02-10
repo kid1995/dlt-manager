@@ -1,0 +1,192 @@
+buildscript {
+	repositories {
+		maven {
+			name 'Nexus-Internal Access'
+			url 'https://m2repo.system.local/content/groups/full/'
+		}
+	}
+	dependencies {
+		classpath 'org.postgresql:postgresql:42.7.9'// this is necessary for owasp dependency check
+		// update requires scheme update in sda-dependencycheck.system.local
+	}
+}
+
+plugins {
+	id 'java'
+	id 'application'
+	id 'jacoco'
+	id 'org.sonarqube' version '7.2.2.6593'
+	id 'org.owasp.dependencycheck' version '12.1.6'
+	id 'org.springframework.boot' version '4.0.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+version '1.0.0'
+group = 'de.signaliduna.elpa.provisionsantragsmeldung'
+
+application {
+	mainClass = 'de.signaliduna.elpa.commissionbase.CommissionbaseApplication'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	maven {
+		url "https://m2repo.system.local/content/groups/full/"
+	}
+}
+
+ext {
+	set('springCloudVersion', "2025.1.0")
+	set('jacocoVersion', "0.8.14")
+	set('springaddonsOidcVersion', "9.1.0")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+dependencies {
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	compileOnly 'org.projectlombok:lombok'
+	compileOnly 'org.jetbrains:annotations:26.0.2-1'
+
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+
+	// elpa
+	implementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
+	implementation 'de.signaliduna.elpa.application-store:application-store-client:0.1.0'
+	implementation 'de.signaliduna.elpa:jwt-adapter:2.5.0'
+	implementation 'de.signaliduna.elpa.hint:hint-client:2.3.3'
+
+	// spring-starter
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics'
+	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// spring-cloud
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	// others
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+	implementation 'io.github.springwolf:springwolf-kafka:1.20.0'
+	implementation('net.logstash.logback:logstash-logback-encoder:9.0') {
+		// Provided by Spring Boot
+		exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+	}
+	implementation 'com.ibm.mq:mq-jms-spring-boot-starter:4.0.1'
+	// to fix CVE
+	// Fix CVE-2025-48976: DoS
+	implementation('commons-fileupload:commons-fileupload:1.6.0') {
+		because 'Vulnerability in version 1.5.0 versions with CVE-2025-48976'
+	}
+	// test
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
+	testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	// test-container
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'org.testcontainers:testcontainers-postgresql'
+	// othres
+	testImplementation 'io.micrometer:micrometer-tracing-test'
+	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.0.9'
+	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
+}
+
+test {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport// report is always generated after tests run
+}
+
+jacoco {
+	toolVersion = jacocoVersion
+	reportsDirectory = layout.buildDirectory.dir("jacoco")
+}
+
+jacocoTestReport {
+	dependsOn test
+	getExecutionData().setFrom(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
+	reports {
+		xml.required = true
+		csv.required = false
+		html.required = false
+	}
+}
+
+jacocoTestCoverageVerification {
+	dependsOn jacocoTestReport
+	violationRules {
+		rule {
+			enabled = true
+			element = 'CLASS'
+			excludes = ['de.signaliduna.elpa.commissionbase.CommissionbaseApplication',
+									'de.signaliduna.elpa.commissionbase.config.*',
+									'de.signaliduna.elpa.commissionbase.adapter.db.model.*'
+			]
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 1.0
+			}
+		}
+	}
+}
+
+tasks.named('check') {
+	dependsOn jacocoTestCoverageVerification
+}
+
+dependencyCheck {
+	outputDirectory = layout.buildDirectory.asFile.get().path + "/reports/dependencycheck"
+	format = "XML"
+	autoUpdate = false
+	failOnError = false
+	suppressionFiles = [
+		rootProject.projectDir.toString() + '/dev-setup/suppressed-cves.xml',
+		"https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster"
+	]
+	data.connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
+	data.driver = "org.postgresql.Driver"
+	data.username = "ZA-SVC-DEPCHK-P"
+	data.password = "QPmWX.CZ4hbJRtU"
+	data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
+	analyzers.centralEnabled = false
+	analyzers.nexusEnabled = false
+}
+
+tasks.named('sonarqube') {
+	dependsOn jacocoTestCoverageVerification
+}
+
+sonarqube {
+	properties {
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.coverage.exclusions", "**/mapstruct/*.*"
+	}
+}
+
