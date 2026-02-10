@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        maven {
+            name 'Nexus-Internal Access'
+            url 'https://m2repo.system.local/content/groups/full/'
+        }
+    }
+}
+
+rootProject.name = 'dlt-manager'
+include 'backend'
+include 'error-handler-lib'

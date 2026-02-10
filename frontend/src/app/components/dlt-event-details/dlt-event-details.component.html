@@ -1,0 +1,76 @@
+<si-heading [size]="200"> DLT Event Details</si-heading>
+
+<div class="icon-bar">
+  <div class="items-left">
+    <a href="/dlt-event-overview">
+      <si-button
+        theme="ghost"
+        variant="icon-only"
+        [matTooltip]="'Back to DLT event overview'"
+      >
+        <si-button-icon svg="functionalArrowLeftBig" collection="navigation" />
+      </si-button>
+    </a>
+  </div>
+
+  <div class="items-right">
+    <si-button
+      theme="ghost"
+      variant="icon-only"
+      [matTooltip]="'Refresh DLT detail data'"
+      (click)="refresh()"
+    >
+      <si-button-icon svg="functionalSync" collection="navigation" />
+    </si-button>
+  </div>
+</div>
+
+<br />
+<si-heading [size]="100">Event Metadata</si-heading>
+<div class="key-value-data-container">
+  <ng-container *ngFor="let field of metadataFields">
+    <si-key-value-multitype [keyPosition]="'aside'">
+      <div slot="key">{{ field.label }}</div>
+      <div slot="value">
+        <ng-container [ngSwitch]="field.pipe">
+          <ng-container *ngSwitchCase="'date-short'">
+            {{
+              extractValue(dltEvent, field.key)
+                | date: 'short' : undefined : 'de'
+            }}
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            {{ extractValue(dltEvent, field.key) }}
+          </ng-container>
+        </ng-container>
+      </div>
+    </si-key-value-multitype>
+  </ng-container>
+</div>
+
+@if (dltEvent?.lastAdminAction) {
+  <br />
+  <si-heading [size]="100">Last Admin Action</si-heading>
+  <div class="key-value-data-container">
+    <ng-container *ngFor="let field of lastAdminActionFields">
+      <si-key-value-multitype [keyPosition]="'aside'">
+        <div slot="key">{{ field.label }}</div>
+        <div slot="value">
+          {{ extractValue(dltEvent?.lastAdminAction, field.key) }}
+        </div>
+      </si-key-value-multitype>
+    </ng-container>
+  </div>
+}
+
+<br />
+<si-heading [size]="100">Event Details</si-heading>
+<si-expander title="DLT Event (raw data)" [disableTransition]="true">
+  <pre class="code">{{ dltEventRawJson }}</pre>
+</si-expander>
+<si-expander title="Payload" [disableTransition]="true">
+  <pre class="code">{{ dltEvent?.payload }}</pre>
+</si-expander>
+<si-expander title="Stacktrace" [disableTransition]="true">
+  <pre class="code">{{ dltEvent?.stackTrace }}</pre>
+</si-expander>

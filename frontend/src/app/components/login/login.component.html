@@ -1,0 +1,15 @@
+<div class="login-form-container">
+  <si-heading [size]="400" style="margin-left: auto; margin-right: auto;">Login</si-heading>
+  
+  <si-button
+    style="display:block; padding-top:var(--space-100);"
+    theme="primary"
+    class="submit-button"
+    data-slot="button-container"
+    (click)="onSubmit()"
+    (keyup)="onSubmit()"
+    >
+    <span>Login with SSO</span>
+  <si-button-icon glyph="functionalLogin" collection="essentials" direction="right"> </si-button-icon>
+  </si-button>
+</div>

@@ -1,0 +1,31 @@
+@import "@signal-iduna/ui/public/assets/styles/variables.scss";
+
+:host {
+  display: flex;
+  justify-content: center;
+  vertical-align: middle;
+  align-items: center;
+  height: 100%;
+}
+
+.login-form-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 2rem 1rem;
+  width: 480px;
+  height: fit-content;
+  box-shadow: var(--shadow-50);
+}
+
+.login-form-container > si-heading {
+  --si-heading-color: var(--color-primary-100);
+  margin-bottom: 1.5em;
+}
+
+.login-form-container > si-inputfield {
+  margin-bottom: 1.5em;
+}
+
+.submit-button {
+  width: 100%;
+}

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ${RESOURCE_NAME}-template
+
+parameters:
+  - description: Name of origin branch
+    displayName: Branch name
+    name: BRANCH_NAME
+    required: true
+  - description: Unique Name of openshift resource.
+    displayName: Name of openshift resource.
+    name: RESOURCE_NAME
+    required: true
+
+objects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ${RESOURCE_NAME}
+      labels:
+        branch: ${BRANCH_NAME}
+    data:
+      AUTH_USER: "S000374"
+      TOKEN_ENDPOINT_URL: "http://oauthccf.system.local/token/jwt/sso/60/"
+      SPRING_PROFILES_ACTIVE: "prod"
+      AUTH_URL: "https://employee.login.signal-iduna.org/"
+      KAFKA_BROKER: "si-cluster-kafka-brokers.kafka-cluster-prd.svc.cluster.local:9093"
+      KAFKA_USER: "elpa-dltmanager-prd"
+      KAFKA_CONSUMER_GROUP: "elpa-dltmanager-prd"
+      KAFKA_JAAS_ENABLED: "true"
+      KAFKA_SECURITY_PROTOCOL: "SASL_SSL"
+      KAFKA_SASL_MECHANISM: "SCRAM-SHA-512"
+      SERVICE_SYSTEM: "PRODUKTION"
+      LOGBACK_FILE: "logback-json.xml"
+      PAPIERANTRAG_EINGANG_SERVICE_URL: "https://prd-papierantrageingang-elpa-pape-prd.cloud.system.local/api"

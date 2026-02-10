@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  margin-left: var(--space-50);
+  --si-key-value-template-columns: 1fr 4fr;
+}
+
+.icon-bar {
+  margin-top: -30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.key-value-data-container {
+  margin-left: var(--space-100);
+}
+
+.code {
+  font-family: "Inconsolata", monospace;
+}

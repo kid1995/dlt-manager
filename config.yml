@@ -1,0 +1,2 @@
+# Empty file to keep the SDA start script happy
+# Real application configuration is done in src/main/resources/application.yml

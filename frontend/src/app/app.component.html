@@ -1,0 +1,30 @@
+<main class="main">
+  <div class="content">
+    <si-app-header applicationName="ELPA:4 DLT Admin UI">
+      <a href="/" title="Signal Iduna Startseite" slot="logo"
+        ><si-header-logo></si-header-logo
+      ></a>
+      @if (isAuthenticated()) {
+        <a
+          title="Logout"
+          slot="interaction"
+          role="presentation"
+          (click)="logout()"
+          (keyup)="logout()"
+        >
+          <si-header-link>
+            <si-icon
+              slot="icon"
+              width="24px"
+              height="24px"
+              glyph="functionalLogin"
+            ></si-icon>
+            <span slot="label">Logout</span>
+          </si-header-link>
+        </a>
+      }
+    </si-app-header>
+  </div>
+</main>
+
+<router-outlet />

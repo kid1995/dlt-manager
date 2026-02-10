@@ -1,0 +1,52 @@
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'org.springframework.cloud:spring-cloud-stream'
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	api("io.cloudevents:cloudevents-spring:${cloudeventsVersion}")
+	api("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
+	implementation 'io.micrometer:micrometer-tracing'
+	implementation 'org.apache.commons:commons-lang3:3.17.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
+	testImplementation 'de.signaliduna.elpa:elpa4-model:1.0.8'
+}
+
+publishing {
+	publications {
+		ErrorHandlerLib(MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+		maven {
+			name = 'SILocal'
+			credentials {
+				username project.findProperty('NEXUS_USER') as String ?: ''
+				password project.findProperty('NEXUS_PASSWORD') as String ?: ''
+			}
+			url = (project.version as String).contains("SNAPSHOT") ? 'https://m2repo.system.local/content/repositories/si-snapshot' : 'https://m2repo.system.local/content/repositories/si-release'
+			allowInsecureProtocol true
+		}
+	}
+}

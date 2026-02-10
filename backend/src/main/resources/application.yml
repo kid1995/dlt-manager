@@ -1,0 +1,154 @@
+spring:
+  application:
+    name: dlt-manager
+  cloud:
+    function:
+      definition: dltEventReceived
+    stream:
+      default:
+        group: ${KAFKA_CONSUMER_GROUP}
+      bindings:
+        dltEventReceived-in-0:
+          destination: ${topics.elpa-dlt}
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKER:localhost:9092}
+          enableObservation: true
+          configuration:
+            sasl:
+              jaas:
+                enabled: ${KAFKA_JAAS_ENABLED:false}
+                config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${KAFKA_USER}" password="${KAFKA_PASSWORD}";
+              mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+            security:
+              user: ${KAFKA_USER}
+              password: ${KAFKA_PASSWORD}
+              protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+              saslMechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+          consumerProperties:
+            auto-offset-reset: latest
+    openfeign:
+      client:
+        config:
+          papierantragEingangClient:
+            url: ${papierantragEingangConfig.baseUrl}
+            connectTimeout: 5000
+            readTimeout: 5000
+            loggerLevel: basic
+  data:
+    mongodb:
+      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
+      database: mongodb
+      #      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost}/filearchiving
+      uuid-representation: standard
+
+
+com:
+  c4-soft:
+    springaddons:
+      oidc:
+        resourceserver:
+          cors[0]:
+            allowed-origin-patterns:
+              - https://*.signal-iduna.de
+              - https://*.signal-iduna.org
+              - https://*.system.local
+              - https://*.system-a.local
+              - https://*.osot.system.local
+              - https://*.cloud-test.system.local
+              - https://*.cloud.system.local
+              - localhost:[0-9]*.
+              - http://localhost:[*]
+            allowed-methods:
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+            allowed-headers:
+              - origin
+              - content-type
+              - X-Requested-With
+              - accept
+              - authorization
+              - consumer-name
+              - consumer-token
+              - consumer
+          permit-all:
+            - /health/readiness
+            - /health/liveness
+            - /v3/api-docs/**
+            - /api-docs
+            - /openapi.yaml
+            - /docs/rest
+            - /metrics/prometheus
+            - /springwolf/**
+        ops[0]:
+          iss: ${AUTH_URL:https://employee.login.int.signal-iduna.org/}
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info,mappings,metrics,prometheus
+      path-mapping:
+        prometheus: metrics/prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  server:
+    port: 8081
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+topics:
+  elpa-dlt: elpa-dlt
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /docs/rest
+    operations-sorter: method
+  paths-to-exclude: /springwolf/**
+
+springwolf:
+  enabled: true
+  docket:
+    base-package: "de.signaliduna.dltmanager"
+    info:
+      title: dlt-manager
+      version: 1.0.0
+    servers:
+      kafka:
+        protocol: kafka
+        host: ${KAFKA_BROKERS:localhost:9092}
+
+jwt:
+  url: ${AUTH_URL:https://employee.login.int.signal-iduna.org/}
+  username: ${AUTH_USER:S000325}
+  password: ${AUTH_PASSWORD}
+
+authorization:
+  users: ${AUTH_USERS:S000325, S000759, U116330, U152248, U152562, U160721, U161044, U163788, U167653}
+
+papierantragEingangConfig:
+  baseUrl: ${PAPIERANTRAG_EINGANG_SERVICE_URL:https://tst-papierantrageingang-elpa-pape-tst.osot.system.local/api/}
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud: WARN
+        integration: WARN
+        kafka: WARN
+      apache:
+        kafka: WARN
+    de:
+      signaliduna: DEBUG
+  config: classpath:${LOGBACK_FILE:logback-plain.xml}
