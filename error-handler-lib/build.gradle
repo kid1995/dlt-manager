@@ -16,7 +16,7 @@ dependencyManagement {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.cloud:spring-cloud-stream'
@@ -49,4 +49,7 @@ publishing {
 			allowInsecureProtocol true
 		}
 	}
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }

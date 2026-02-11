@@ -1,6 +1,6 @@
 package de.signaliduna.dltmanager.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.core.service.DltEventAdminService;

@@ -1,8 +1,6 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.errorhandler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.elpa.sharedlib.model.AllgemeineDaten;
 import de.signaliduna.elpa.sharedlib.model.Antrag;
 import de.signaliduna.elpa.sharedlib.model.Vorgang;
@@ -11,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.support.GenericMessage;
+import tools.jackson.core.JacksonException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -31,7 +30,6 @@ class VorgangProcessIdExtractorTest {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	static {
-		OBJECT_MAPPER.registerModule(new JavaTimeModule());
 	}
 
 	@Nested
@@ -85,7 +83,7 @@ class VorgangProcessIdExtractorTest {
 	private static String asJsonString(final Object obj) {
 		try {
 			return OBJECT_MAPPER.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 	}

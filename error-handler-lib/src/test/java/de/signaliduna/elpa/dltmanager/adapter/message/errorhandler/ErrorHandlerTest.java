@@ -1,8 +1,6 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.errorhandler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.http.FeignExceptionRecoverabilityChecker;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.http.RecoverableHttpErrorCodes;
 import de.signaliduna.elpa.dltmanager.adapter.message.producer.DltTopicProducer;
@@ -21,6 +19,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
+import tools.jackson.core.JacksonException;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +39,6 @@ class ErrorHandlerTest {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	static {
-		OBJECT_MAPPER.registerModule(new JavaTimeModule());
 	}
 
 	@Mock
@@ -147,7 +145,7 @@ class ErrorHandlerTest {
 	private static String asJsonString(final Object obj) {
 		try {
 			return OBJECT_MAPPER.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 	}

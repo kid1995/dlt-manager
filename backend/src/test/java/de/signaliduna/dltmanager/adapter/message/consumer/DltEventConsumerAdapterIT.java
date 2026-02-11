@@ -1,8 +1,6 @@
 package de.signaliduna.dltmanager.adapter.message.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventRepository;
 import de.signaliduna.dltmanager.adapter.db.model.DltEventEntity;
 import de.signaliduna.dltmanager.test.AbstractSingletonContainerTest;
@@ -21,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
+import tools.jackson.core.JacksonException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -118,7 +117,7 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 			final var decodedPayload = Base64.getDecoder().decode(messageDto.payload);
 			final var decodedPayloadStr = new String(decodedPayload, StandardCharsets.UTF_8);
 			return MessageBuilder.withPayload(decodedPayloadStr).copyHeaders(messageDto.headers).build();
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -131,7 +130,6 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 		@Bean
 		public ObjectMapper dltEventPersistenceService() {
 			final var om = new ObjectMapper();
-			om.registerModule(new JavaTimeModule());
 			return om;
 		}
 	}

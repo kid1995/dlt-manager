@@ -1,16 +1,14 @@
 package de.signaliduna.dltmanager.test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.cfg.JsonNodeFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.JsonNodeFeature;
 import org.assertj.core.api.AbstractStringAssert;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.core.JacksonException;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -25,14 +23,10 @@ public class TestUtil {
 	static {
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-		PRETTY_PRINT_MAPPER.registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 		PRETTY_PRINT_MAPPER.configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false);
 		PRETTY_PRINT_MAPPER.configure(JsonNodeFeature.WRITE_PROPERTIES_SORTED, false);
 		PRETTY_PRINT_MAPPER.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-		PRETTY_PRINT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		PRETTY_PRINT_MAPPER.setDefaultPrettyPrinter(prettyPrinter);
-
-		NORMAL_MAPPER.registerModule(new JavaTimeModule());
 	}
 
 	public static <T> ArgumentCaptor<T> captureSingleArg(Class<T> clazz, Consumer<ArgumentCaptor<T>> consumer) {
@@ -58,7 +52,7 @@ public class TestUtil {
 	public static <T> String asJsonString(T data) {
 		try {
 			return NORMAL_MAPPER.writeValueAsString(data);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -66,7 +60,7 @@ public class TestUtil {
 	public static <T> String asPrettyJsonString(T data) {
 		try {
 			return PRETTY_PRINT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(data);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -75,7 +69,7 @@ public class TestUtil {
 		final JsonNode json;
 		try {
 			json = PRETTY_PRINT_MAPPER.reader().readTree(inputJsonString);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 		return asPrettyJsonString(json);

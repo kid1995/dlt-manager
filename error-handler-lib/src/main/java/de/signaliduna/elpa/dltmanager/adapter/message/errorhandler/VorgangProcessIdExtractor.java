@@ -1,7 +1,7 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.errorhandler;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.messaging.Message;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class VorgangProcessIdExtractor implements IdExtractor {
 			if (processIdNode == null) {
 				throw new IllegalArgumentException("failed to extract Vorgang.%s: field not found".formatted(this.idName()));
 			}
-			return processIdNode.asText();
+			return processIdNode.asString();
 		} catch (IOException e) {
 			throw new IllegalArgumentException("failed to read VorgangStub", e);
 		}

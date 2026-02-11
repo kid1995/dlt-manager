@@ -1,7 +1,6 @@
 package de.signaliduna.dltmanager.core.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.core.exception.DltEventAdminServiceException;
@@ -10,6 +9,7 @@ import de.signaliduna.elpa.sharedlib.model.Vorgang;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -105,7 +105,7 @@ public class DltEventAdminService {
 	<T> T decodeDltEventPayload(DltEvent dltEvent, Class<T> targetType) {
 		try {
 			return objectMapper.readValue(dltEvent.payload(), targetType);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new DltEventAdminServiceException("failed to decode payload of DltEvent id " + dltEvent.dltEventId(), e);
 		}
 	}

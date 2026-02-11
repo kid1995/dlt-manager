@@ -1,6 +1,6 @@
 package de.signaliduna.elpa.dltmanager.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.VorgangProcessIdExtractor;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.ExceptionRecoverabilityChecker;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.http.FeignExceptionRecoverabilityChecker;
