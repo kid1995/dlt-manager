@@ -1,0 +1,181 @@
+---
+# =============================================================================
+# Extended OpenRewrite Recipe for ELPA Spring Boot 4 Migration
+# =============================================================================
+# Based on patterns from hint-service (combine-hint) reference project.
+#
+# This recipe extends the community Spring Boot 4 recipe with:
+#   - Jackson 2.x → 3.x (full migration)
+#   - Spring Boot 4 autoconfigure package relocations
+#   - Spring Cloud 2025.1.0
+#   - spring-addons 9.x
+#   - springwolf-kafka 2.x
+#   - logstash-logback-encoder 9.x
+#   - WireMock Spring Boot 4.x
+#   - Testcontainers PostgreSQL package rename
+#
+# Usage:
+#   1. Place this file at: config/rewrite.yml
+#   2. Add OpenRewrite plugin + dependencies to root build.gradle
+#   3. Run: ./gradlew rewriteDryRun   (preview)
+#   4. Run: ./gradlew rewriteRun      (apply)
+# =============================================================================
+type: specs.openrewrite.org/v1beta/recipe
+name: de.signaliduna.elpa.UpgradeToSpringBoot4
+displayName: ELPA – Migrate to Spring Boot 4.0 (Extended)
+description: |
+  Extends the OpenRewrite community Spring Boot 4.0 recipe with ELPA-specific
+  migrations: Jackson 3.x, autoconfigure relocations, Spring Cloud 2025,
+  spring-addons 9.x, springwolf-kafka 2.x, and more.
+tags:
+  - spring
+  - boot
+  - elpa
+
+recipeList:
+
+  # ===========================================================================
+  # 1) COMMUNITY BASE – Spring Boot 4.0
+  # ===========================================================================
+  # Already handles:
+  #   - @MockBean → @MockitoBean, @SpyBean → @MockitoSpyBean
+  #   - starter-web → starter-webmvc
+  #   - starter-aop → starter-aspectj
+  #   - starter-oauth2-resource-server → starter-security-oauth2-resource-server
+  #   - Modular test starters (MigrateToModularStarters)
+  #   - Testcontainers 2.x module renames (junit-jupiter → testcontainers-junit-jupiter)
+  #   - Spring Boot properties migration
+  #   - Spring Framework 7.0, Spring Security 7.0
+  #   - Hibernate 7.1
+  #   - SpringDoc 3.0
+  # ===========================================================================
+  - org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0
+
+  # ===========================================================================
+  # 2) JACKSON 2.x → 3.x  *** NOT in the community recipe ***
+  # ===========================================================================
+  # Handles:
+  #   - Package: com.fasterxml.jackson.* → tools.jackson.*
+  #   - Types: exception renames, class renames
+  #   - Methods: writeObject→writePOJO, getCurrentValue→currentValue, etc.
+  #   - Dependencies: groupId com.fasterxml.jackson → tools.jackson
+  #   - Removes redundant feature flags (defaults changed in 3.x)
+  #   - Removes built-in module registrations (auto-registered in 3.x)
+  #   - Exception simplification (checked → unchecked)
+  # ===========================================================================
+  - org.openrewrite.java.jackson.UpgradeJackson_2_3
+
+  # ===========================================================================
+  # 3) SPRING BOOT 4 AUTOCONFIGURE PACKAGE RELOCATIONS
+  # ===========================================================================
+  # Boot 4 moved test autoconfigure annotations to new packages.
+  # The community MigrateAutoconfigurePackages handles some, these ensure
+  # full coverage for patterns seen in hint-service.
+  # ===========================================================================
+
+  # @DataJpaTest → new package
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+      newFullyQualifiedTypeName: org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+
+  # @WebMvcTest → new package
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+      newFullyQualifiedTypeName: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+
+  # ===========================================================================
+  # 4) TESTCONTAINERS 2.x – PostgreSQL specifics
+  # ===========================================================================
+  # Community recipe handles junit-jupiter → testcontainers-junit-jupiter.
+  # These handle PostgreSQL-specific changes:
+  #   - Artifact: postgresql → testcontainers-postgresql
+  #   - Class: org.testcontainers.containers.PostgreSQLContainer
+  #           → org.testcontainers.postgresql.PostgreSQLContainer
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: postgresql
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-postgresql
+
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.testcontainers.containers.PostgreSQLContainer
+      newFullyQualifiedTypeName: org.testcontainers.postgresql.PostgreSQLContainer
+
+  # MongoDB (if used, e.g., dlt-manager)
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: mongodb
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-mongodb
+
+  # Kafka (if used)
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: kafka
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-kafka
+
+  # ===========================================================================
+  # 5) SPRING CLOUD → 2025.1.0
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.springframework.cloud
+      artifactId: "*"
+      newVersion: 2025.1.x
+      overrideManagedVersion: false
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.springframework.cloud
+      artifactId: spring-cloud-dependencies
+      newVersion: 2025.1.x
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 6) SPRING-ADDONS 7.x → 9.x
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: com.c4-soft.springaddons
+      artifactId: spring-addons-starter-oidc
+      newVersion: 9.x
+      overrideManagedVersion: true
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: com.c4-soft.springaddons
+      artifactId: spring-addons-starter-oidc-test
+      newVersion: 9.x
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 7) SPRINGWOLF-KAFKA 1.x → 2.x
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: io.github.springwolf
+      artifactId: springwolf-kafka
+      newVersion: 2.x
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 8) LOGSTASH-LOGBACK-ENCODER → 9.x
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: net.logstash.logback
+      artifactId: logstash-logback-encoder
+      newVersion: 9.x
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 9) WIREMOCK SPRING BOOT → 4.x
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.wiremock.integrations
+      artifactId: wiremock-spring-boot
+      newVersion: 4.x
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 10) MAPSTRUCT → latest 1.6.x
+  # ===========================================================================
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.mapstruct
+      artifactId: "*"
+      newVersion: 1.6.x
+      overrideManagedVersion: true
