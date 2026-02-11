@@ -1,0 +1,37 @@
+// =============================================================================
+// OpenRewrite Configuration – add to root build.gradle
+// =============================================================================
+//
+//   ./gradlew rewriteDryRun    → preview changes (no modifications)
+//   ./gradlew rewriteRun       → apply changes
+//
+// Place rewrite.yml in: config/rewrite.yml
+// =============================================================================
+
+plugins {
+    id("org.openrewrite.rewrite") version("latest.release")
+}
+
+rewrite {
+    activeRecipe("de.signaliduna.elpa.UpgradeToSpringBoot4")
+    setExportDatatables(true)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot 4 migration recipes (community edition)
+    // Includes: @MockBean→@MockitoBean, modular starters, Boot properties,
+    //           Spring Framework 7, Security 7, Hibernate 7.1, SpringDoc 3.0,
+    //           Testcontainers 2.x base renames
+    rewrite("org.openrewrite.recipe:rewrite-spring:6.23.1")
+
+    // Jackson 2.x → 3.x migration (separate module, NOT bundled in rewrite-spring)
+    // Includes: package renames, type renames, method renames, dependency changes
+    rewrite("org.openrewrite.recipe:rewrite-jackson:1.15.0")
+
+    // Testcontainers 2.x migration (may already be transitively included)
+    rewrite("org.openrewrite.recipe:rewrite-testing-frameworks:3.8.0")
+}
