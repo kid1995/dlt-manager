@@ -1,0 +1,90 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: de.signaliduna.elpa.UpgradeToSpringBoot4
+displayName: ELPA – Migrate to Spring Boot 4.0 (Extended)
+description: |
+  Extends the OpenRewrite community Spring Boot 4.0
+tags:
+  - spring
+  - boot
+  - elpa
+
+recipeList:
+
+  - org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0
+  - org.openrewrite.java.jackson.UpgradeJackson_2_3
+  # @DataJpaTest → new package
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+      newFullyQualifiedTypeName: org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+  # @WebMvcTest → new package
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+      newFullyQualifiedTypeName: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: postgresql
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-postgresql
+
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.testcontainers.containers.PostgreSQLContainer
+      newFullyQualifiedTypeName: org.testcontainers.postgresql.PostgreSQLContainer
+
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: mongodb
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-mongodb
+
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.testcontainers
+      oldArtifactId: kafka
+      newGroupId: org.testcontainers
+      newArtifactId: testcontainers-kafka
+
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.springframework.cloud
+      artifactId: "*"
+      newVersion: 2025.1.x
+      overrideManagedVersion: false
+
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.springframework.cloud
+      artifactId: spring-cloud-dependencies
+      newVersion: 2025.1.x
+      overrideManagedVersion: true
+
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: com.c4-soft.springaddons
+      artifactId: spring-addons-starter-oidc
+      newVersion: 9.x
+      overrideManagedVersion: true
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: com.c4-soft.springaddons
+      artifactId: spring-addons-starter-oidc-test
+      newVersion: 9.x
+      overrideManagedVersion: true
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: io.github.springwolf
+      artifactId: springwolf-kafka
+      newVersion: 2.x
+      overrideManagedVersion: true
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: net.logstash.logback
+      artifactId: logstash-logback-encoder
+      newVersion: 9.x
+      overrideManagedVersion: true
+
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.wiremock.integrations
+      artifactId: wiremock-spring-boot
+      newVersion: 4.0.9
+      overrideManagedVersion: true
+
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.mapstruct
+      artifactId: "*"
+      newVersion: 1.6.x
+      overrideManagedVersion: true

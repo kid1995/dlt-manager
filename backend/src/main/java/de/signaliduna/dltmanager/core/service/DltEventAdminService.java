@@ -1,6 +1,5 @@
 package de.signaliduna.dltmanager.core.service;
 
-import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.core.exception.DltEventAdminServiceException;
@@ -10,6 +9,7 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,14 +20,14 @@ public class DltEventAdminService {
 
 	private final DltEventPersistenceAdapter dltEventPersistenceAdapter;
 	private final PapierantragEingangAdapter papierantragEingangAdapter;
-	private final ObjectMapper objectMapper;
+	private final JsonMapper jsonMapper;
 
 	public DltEventAdminService(
-		DltEventPersistenceAdapter dltEventPersistenceAdapter, PapierantragEingangAdapter papierantragEingangAdapter, ObjectMapper objectMapper
+		DltEventPersistenceAdapter dltEventPersistenceAdapter, PapierantragEingangAdapter papierantragEingangAdapter, JsonMapper jsonMapper
 	) {
 		this.dltEventPersistenceAdapter = dltEventPersistenceAdapter;
 		this.papierantragEingangAdapter = papierantragEingangAdapter;
-		this.objectMapper = objectMapper;
+		this.jsonMapper = jsonMapper;
 	}
 
 	public List<DltEventWithAdminActions> getDltEvents() {
@@ -104,7 +104,7 @@ public class DltEventAdminService {
 
 	<T> T decodeDltEventPayload(DltEvent dltEvent, Class<T> targetType) {
 		try {
-			return objectMapper.readValue(dltEvent.payload(), targetType);
+			return jsonMapper.readValue(dltEvent.payload(), targetType);
 		} catch (JacksonException e) {
 			throw new DltEventAdminServiceException("failed to decode payload of DltEvent id " + dltEvent.dltEventId(), e);
 		}

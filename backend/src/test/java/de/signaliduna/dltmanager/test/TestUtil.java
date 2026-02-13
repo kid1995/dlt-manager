@@ -4,29 +4,26 @@ import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.JsonNodeFeature;
 import org.assertj.core.api.AbstractStringAssert;
 import org.mockito.ArgumentCaptor;
 import tools.jackson.core.JacksonException;
-
-import java.io.IOException;
+import tools.jackson.databind.json.JsonMapper;
 import java.util.function.Consumer;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class TestUtil {
 
-	private static final ObjectMapper PRETTY_PRINT_MAPPER = new ObjectMapper();
-	private static final ObjectMapper NORMAL_MAPPER = new ObjectMapper();
+	private static final JsonMapper PRETTY_PRINT_MAPPER;
+	private static final JsonMapper NORMAL_MAPPER;
 
 	static {
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-		PRETTY_PRINT_MAPPER.configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false);
-		PRETTY_PRINT_MAPPER.configure(JsonNodeFeature.WRITE_PROPERTIES_SORTED, false);
-		PRETTY_PRINT_MAPPER.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-		PRETTY_PRINT_MAPPER.setDefaultPrettyPrinter(prettyPrinter);
+		PRETTY_PRINT_MAPPER = JsonMapper.builder().configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
+		.configure(JsonNodeFeature.WRITE_PROPERTIES_SORTED, false)
+		.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
+		.defaultPrettyPrinter(prettyPrinter).build();
+		NORMAL_MAPPER = JsonMapper.builder().build();
 	}
 
 	public static <T> ArgumentCaptor<T> captureSingleArg(Class<T> clazz, Consumer<ArgumentCaptor<T>> consumer) {

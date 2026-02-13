@@ -35,7 +35,7 @@ class DltEventPersistenceAdapterTest {
 	class streamAll {
 		@Test
 		void shouldWork() {
-			when(dltEventRepository.streamAll()).thenReturn(Stream.of(EntityMapper.toDltEventEntity(DLT_EVENT_1)));
+			when(dltEventRepository.findAllByOrderByLastAdminActionDesc()).thenReturn(Stream.of(EntityMapper.toDltEventEntity(DLT_EVENT_1)));
 			assertThat(dltEventPersistenceAdapter.streamAll()).containsExactly(DLT_EVENT_1);
 		}
 	}
@@ -44,7 +44,7 @@ class DltEventPersistenceAdapterTest {
 	class findDltEventById {
 		@Test
 		void shouldReturnDataForKnownDltEventId() {
-			when(dltEventRepository.findByDltEventId(DLT_EVENT1_ID)).thenReturn(Optional.of(EntityMapper.toDltEventEntity(DLT_EVENT_1)));
+			when(dltEventRepository.findById(DLT_EVENT1_ID)).thenReturn(Optional.of(EntityMapper.toDltEventEntity(DLT_EVENT_1)));
 			assertThat(dltEventPersistenceAdapter.findDltEventById(DLT_EVENT1_ID)).contains(DLT_EVENT_1);
 		}
 	}
@@ -67,8 +67,14 @@ class DltEventPersistenceAdapterTest {
 	class deleteByDltEventId {
 		@Test
 		void shouldReturnTrueForExistingDltEventId() {
-			when(dltEventRepository.deleteByDltEventId(DLT_EVENT1_ID)).thenReturn(true);
+			when(dltEventRepository.deleteByDltEventId(DLT_EVENT1_ID)).thenReturn(1L);
 			assertThat(dltEventPersistenceAdapter.deleteByDltEventId(DLT_EVENT1_ID)).isTrue();
+		}
+
+		@Test
+		void shouldReturnFalseForExistingDltEventId() {
+			when(dltEventRepository.deleteByDltEventId(DLT_EVENT1_ID)).thenReturn(0L);
+			assertThat(dltEventPersistenceAdapter.deleteByDltEventId(DLT_EVENT1_ID)).isFalse();
 		}
 	}
 

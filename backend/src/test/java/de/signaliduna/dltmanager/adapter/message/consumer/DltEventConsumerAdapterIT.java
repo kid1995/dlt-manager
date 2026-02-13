@@ -1,15 +1,15 @@
 package de.signaliduna.dltmanager.adapter.message.consumer;
 
-import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventRepository;
 import de.signaliduna.dltmanager.adapter.db.model.DltEventEntity;
-import de.signaliduna.dltmanager.test.AbstractSingletonContainerTest;
+import de.signaliduna.dltmanager.test.ContainerImageNames;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.core.FunctionInvocationHelper;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -19,7 +19,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -28,11 +32,15 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-	properties = {"com.c4-soft.springaddons.oidc.resourceserver.enabled=false"},
-	webEnvironment = SpringBootTest.WebEnvironment.MOCK
+	properties = {"com.c4-soft.springaddons.oidc.resourceserver.enabled=false", "jwt.enable=false" }
 )
+@Testcontainers
 @Import(TestChannelBinderConfiguration.class)
-class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
+class DltEventConsumerAdapterIT {
+
+	@Container
+	@ServiceConnection
+	static final MongoDBContainer mongoDBContainer = new MongoDBContainer(ContainerImageNames.MONGO.getImageName());
 
 	@Value("${topics.elpa-dlt}")
 	String elpaDltTopic;
@@ -44,7 +52,7 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 	FunctionInvocationHelper<Message<?>> functionInvocationHelper;
 
 	@Autowired
-	ObjectMapper objectMapper;
+	JsonMapper jsonMapper;
 
 	@Autowired
 	InputDestination inputDestination;
@@ -81,7 +89,7 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 		final Message<?> message = functionInvocationHelper.preProcessInput(messageWithKafkaStyleHeader, null);
 		inputDestination.send(message, elpaDltTopic);
 
-		assertThat(dltEventRepo.streamAll()).isEmpty();
+		assertThat(dltEventRepo.findAllByOrderByLastAdminActionDesc()).isEmpty();
 	}
 
 	@Test
@@ -108,12 +116,12 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 		final Message<?> message = functionInvocationHelper.preProcessInput(messageWithKafkaStyleHeader, null);
 		inputDestination.send(message, elpaDltTopic);
 
-		assertThat(dltEventRepo.streamAll()).hasSize(1);
+		assertThat(dltEventRepo.findAllByOrderByLastAdminActionDesc()).hasSize(1);
 	}
 
 	private Message<?> msgFromJsonString(String jsonString) {
 		try {
-			final var messageDto = objectMapper.readValue(jsonString, MessageDto.class);
+			final var messageDto = jsonMapper.readValue(jsonString, MessageDto.class);
 			final var decodedPayload = Base64.getDecoder().decode(messageDto.payload);
 			final var decodedPayloadStr = new String(decodedPayload, StandardCharsets.UTF_8);
 			return MessageBuilder.withPayload(decodedPayloadStr).copyHeaders(messageDto.headers).build();
@@ -128,9 +136,8 @@ class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 	@TestConfiguration
 	static class AdapterTestConfiguration {
 		@Bean
-		public ObjectMapper dltEventPersistenceService() {
-			final var om = new ObjectMapper();
-			return om;
+		public JsonMapper dltEventPersistenceService() {
+			return JsonMapper.builder().build();
 		}
 	}
 }
