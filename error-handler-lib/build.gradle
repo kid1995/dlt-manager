@@ -16,7 +16,7 @@ dependencyManagement {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	implementation 'org.springframework.cloud:spring-cloud-stream'
@@ -25,10 +25,9 @@ dependencies {
 	api("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
 	implementation 'io.micrometer:micrometer-tracing'
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
-	testImplementation 'de.signaliduna.elpa:elpa4-model:1.0.8'
+	testImplementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
+    testImplementation "io.micrometer:micrometer-tracing-test:1.6.3"
 }
 
 publishing {
@@ -49,4 +48,7 @@ publishing {
 			allowInsecureProtocol true
 		}
 	}
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }

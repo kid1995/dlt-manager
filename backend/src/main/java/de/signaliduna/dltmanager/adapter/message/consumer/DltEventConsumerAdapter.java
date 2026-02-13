@@ -1,6 +1,6 @@
 package de.signaliduna.dltmanager.adapter.message.consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.message.consumer.mapper.EventDataMapper;
 import de.signaliduna.dltmanager.adapter.message.consumer.model.DltEventData;
 import de.signaliduna.dltmanager.core.model.DltEvent;

@@ -35,12 +35,9 @@ spring:
             connectTimeout: 5000
             readTimeout: 5000
             loggerLevel: basic
-  data:
-    mongodb:
-      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
-      database: mongodb
-      #      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost}/filearchiving
-      uuid-representation: standard
+  mongodb.database: mongodb
+  mongodb.uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
+  mongodb.representation.uuid: standard
 
 
 com:

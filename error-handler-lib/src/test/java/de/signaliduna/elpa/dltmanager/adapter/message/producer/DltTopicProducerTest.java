@@ -1,7 +1,6 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.model.DltEventData;
 import de.signaliduna.elpa.sharedlib.model.Vorgang;
 import io.cloudevents.CloudEvent;
@@ -44,7 +43,6 @@ class DltTopicProducerTest {
 	private static final Vorgang VORGANG = Vorgang.builder().processId("processId").elpaId("elpaId").build();
 
 	static {
-		OBJECT_MAPPER.registerModule(new JavaTimeModule());
 	}
 
 	@Mock
