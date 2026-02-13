@@ -1,12 +1,6 @@
 spring:
   application:
-    name: ${SERVICE_NAME:dlt-manager}
-  web:
-    error:
-      whitelabel:
-        enabled: false
-  main:
-    banner-mode: off
+    name: dlt-manager
   cloud:
     function:
       definition: dltEventReceived
@@ -41,17 +35,32 @@ spring:
             connectTimeout: 5000
             readTimeout: 5000
             loggerLevel: basic
-  mongodb.database: mongodb
-  mongodb.uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
-  mongodb.representation.uuid: standard
+  data:
+    mongodb:
+      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
+      database: mongodb
+      #      uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost}/filearchiving
+      uuid-representation: standard
+
 
 com:
   c4-soft:
     springaddons:
       oidc:
-        cors:
-          - path: /**
+        resourceserver:
+          cors[0]:
+            allowed-origin-patterns:
+              - https://*.signal-iduna.de
+              - https://*.signal-iduna.org
+              - https://*.system.local
+              - https://*.system-a.local
+              - https://*.osot.system.local
+              - https://*.cloud-test.system.local
+              - https://*.cloud.system.local
+              - localhost:[0-9]*.
+              - http://localhost:[*]
             allowed-methods:
+              - DELETE
               - POST
               - GET
               - OPTIONS
@@ -64,25 +73,12 @@ com:
               - consumer-name
               - consumer-token
               - consumer
-            allowed-origin-patterns:
-              - https://*.signal-iduna.de
-              - https://*.signal-iduna.org
-              - https://*.system.local
-              - https://*.system-a.local
-              - https://*.osot.system.local
-              - https://*.cloud-test.system.local
-              - https://*.cloud.system.local
-              - localhost:[0-9]*.
-              - http://localhost:[*]
-        resourceserver:
           permit-all:
-            - /docs/swagger-ui/**
-            - /api-docs/**
-            - /health
             - /health/readiness
             - /health/liveness
             - /v3/api-docs/**
             - /api-docs
+            - /openapi.yaml
             - /docs/rest
             - /metrics/prometheus
             - /springwolf/**

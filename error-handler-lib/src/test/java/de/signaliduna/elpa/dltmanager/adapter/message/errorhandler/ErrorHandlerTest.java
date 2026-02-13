@@ -1,5 +1,8 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.errorhandler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.http.FeignExceptionRecoverabilityChecker;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.checker.http.RecoverableHttpErrorCodes;
 import de.signaliduna.elpa.dltmanager.adapter.message.producer.DltTopicProducer;
@@ -18,8 +21,6 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -36,9 +37,10 @@ class ErrorHandlerTest {
 	private static final String CLOUD_EVENT_TYPE = "de.signaliduna.elpa.someService.stream.onKafkaEvent-in.error";
 	private static final Vorgang VORGANG = Vorgang.builder().processId("processId").elpaId("elpaId").build();
 
-	private static final JsonMapper JSON_MAPPER = new JsonMapper();
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	static {
+		OBJECT_MAPPER.registerModule(new JavaTimeModule());
 	}
 
 	@Mock
@@ -51,11 +53,11 @@ class ErrorHandlerTest {
 	void beforeEach() {
 		tracer = mock(Tracer.class);
 		if (classUnderTest == null) {
-			final var processIdExtractor = new VorgangProcessIdExtractor(JSON_MAPPER);
+			final var processIdExtractor = new VorgangProcessIdExtractor(OBJECT_MAPPER);
 			final var props = new DltTopicProducer.Props("serviceName", DLT_BINDING, "dltTopic", CLOUD_EVENT_SOURCE, CLOUD_EVENT_TYPE);
 			classUnderTest = Mockito.spy(new ErrorHandler(
 				new RetryTopicProducer(streamBridge, RETRY_BINDING, "retryTopic"),
-				new DltTopicProducer(streamBridge, tracer, JSON_MAPPER, props), processIdExtractor, new FeignExceptionRecoverabilityChecker(new RecoverableHttpErrorCodes())
+				new DltTopicProducer(streamBridge, tracer, OBJECT_MAPPER, props), processIdExtractor, new FeignExceptionRecoverabilityChecker(new RecoverableHttpErrorCodes())
 			));
 		}
 	}
@@ -144,8 +146,8 @@ class ErrorHandlerTest {
 
 	private static String asJsonString(final Object obj) {
 		try {
-			return JSON_MAPPER.writeValueAsString(obj);
-		} catch (JacksonException e) {
+			return OBJECT_MAPPER.writeValueAsString(obj);
+		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 	}

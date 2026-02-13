@@ -1,15 +1,17 @@
 package de.signaliduna.dltmanager.adapter.message.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.signaliduna.dltmanager.adapter.db.DltEventRepository;
 import de.signaliduna.dltmanager.adapter.db.model.DltEventEntity;
-import de.signaliduna.dltmanager.test.ContainerImageNames;
+import de.signaliduna.dltmanager.test.AbstractSingletonContainerTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.core.FunctionInvocationHelper;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -19,11 +21,6 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mongodb.MongoDBContainer;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -32,15 +29,11 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-	properties = {"com.c4-soft.springaddons.oidc.resourceserver.enabled=false", "jwt.enable=false" }
+	properties = {"com.c4-soft.springaddons.oidc.resourceserver.enabled=false"},
+	webEnvironment = SpringBootTest.WebEnvironment.MOCK
 )
-@Testcontainers
 @Import(TestChannelBinderConfiguration.class)
-class DltEventConsumerAdapterIT {
-
-	@Container
-	@ServiceConnection
-	static final MongoDBContainer mongoDBContainer = new MongoDBContainer(ContainerImageNames.MONGO.getImageName());
+class DltEventConsumerAdapterIT extends AbstractSingletonContainerTest {
 
 	@Value("${topics.elpa-dlt}")
 	String elpaDltTopic;
@@ -52,7 +45,7 @@ class DltEventConsumerAdapterIT {
 	FunctionInvocationHelper<Message<?>> functionInvocationHelper;
 
 	@Autowired
-	JsonMapper jsonMapper;
+	ObjectMapper objectMapper;
 
 	@Autowired
 	InputDestination inputDestination;
@@ -89,7 +82,7 @@ class DltEventConsumerAdapterIT {
 		final Message<?> message = functionInvocationHelper.preProcessInput(messageWithKafkaStyleHeader, null);
 		inputDestination.send(message, elpaDltTopic);
 
-		assertThat(dltEventRepo.findAllByOrderByLastAdminActionDesc()).isEmpty();
+		assertThat(dltEventRepo.streamAll()).isEmpty();
 	}
 
 	@Test
@@ -116,16 +109,16 @@ class DltEventConsumerAdapterIT {
 		final Message<?> message = functionInvocationHelper.preProcessInput(messageWithKafkaStyleHeader, null);
 		inputDestination.send(message, elpaDltTopic);
 
-		assertThat(dltEventRepo.findAllByOrderByLastAdminActionDesc()).hasSize(1);
+		assertThat(dltEventRepo.streamAll()).hasSize(1);
 	}
 
 	private Message<?> msgFromJsonString(String jsonString) {
 		try {
-			final var messageDto = jsonMapper.readValue(jsonString, MessageDto.class);
+			final var messageDto = objectMapper.readValue(jsonString, MessageDto.class);
 			final var decodedPayload = Base64.getDecoder().decode(messageDto.payload);
 			final var decodedPayloadStr = new String(decodedPayload, StandardCharsets.UTF_8);
 			return MessageBuilder.withPayload(decodedPayloadStr).copyHeaders(messageDto.headers).build();
-		} catch (JacksonException e) {
+		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -136,8 +129,10 @@ class DltEventConsumerAdapterIT {
 	@TestConfiguration
 	static class AdapterTestConfiguration {
 		@Bean
-		public JsonMapper dltEventPersistenceService() {
-			return JsonMapper.builder().build();
+		public ObjectMapper dltEventPersistenceService() {
+			final var om = new ObjectMapper();
+			om.registerModule(new JavaTimeModule());
+			return om;
 		}
 	}
 }

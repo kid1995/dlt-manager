@@ -1,10 +1,10 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.errorhandler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.messaging.Message;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -14,10 +14,10 @@ import java.nio.charset.StandardCharsets;
  * and to avoid version conflicts.
  */
 public class VorgangProcessIdExtractor implements IdExtractor {
-	private final JsonMapper jsonMapper;
+	private final ObjectMapper objectMapper;
 
-	public VorgangProcessIdExtractor(JsonMapper jsonMapper) {
-		this.jsonMapper = jsonMapper;
+	public VorgangProcessIdExtractor(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
@@ -37,21 +37,21 @@ public class VorgangProcessIdExtractor implements IdExtractor {
 
 	byte[] asJsonBytes(Object payload) {
 		try {
-			return jsonMapper.writeValueAsBytes(payload);
-		} catch (JacksonException e) {
+			return objectMapper.writeValueAsBytes(payload);
+		} catch (IOException e) {
 			throw new IllegalArgumentException("failed write value as JSON bytes", e);
 		}
 	}
 
 	String extractVorgangProcessId(byte[] payload) {
 		try {
-			final JsonNode jsonNode = jsonMapper.readTree(payload);
+			final JsonNode jsonNode = objectMapper.readTree(payload);
 			final var processIdNode = jsonNode.get(this.idName());
 			if (processIdNode == null) {
 				throw new IllegalArgumentException("failed to extract Vorgang.%s: field not found".formatted(this.idName()));
 			}
-			return processIdNode.asString();
-		} catch (JacksonException e) {
+			return processIdNode.asText();
+		} catch (IOException e) {
 			throw new IllegalArgumentException("failed to read VorgangStub", e);
 		}
 	}

@@ -2,6 +2,8 @@ package de.signaliduna.dltmanager.adapter.http.api;
 
 import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.config.WebSecurityConfig;
@@ -18,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,8 +29,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -42,13 +42,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import({WebSecurityConfig.class, DltEventAdminService.class, PapierantragEingangAdapter.class})
 @AutoConfigureAddonsWebmvcResourceServerSecurity
-@WebMvcTest(
-	properties = {
-		"jwt.enabled=false"
-	},
-	controllers = DltManagerController.class)
+@Import({WebSecurityConfig.class, DltEventAdminService.class, PapierantragEingangAdapter.class})
+@WebMvcTest(controllers = DltManagerController.class)
 class DltManagerControllerTest {
 
 	private static final String AUTH_USER = "S12345";
@@ -58,7 +54,7 @@ class DltManagerControllerTest {
 	@Autowired
 	MockMvc mockMvc;
 	@Autowired
-	JsonMapper jsonMapper;
+	ObjectMapper objectMapper;
 
 	@MockitoBean
 	@SuppressWarnings("unused")
@@ -93,7 +89,6 @@ class DltManagerControllerTest {
 				"uid", AUTH_USER
 			));
 			final var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-			assert auth != null;
 			when(auth.getToken()).thenReturn(jwt);
 			mockMvc.perform(get("/api/events/overview")
 					.contentType("application/json"))
@@ -234,7 +229,7 @@ class DltManagerControllerTest {
 				  "topic": "topic",
 				  "partition": "partition",
 				  "traceId": "traceId",
-				  "payload" : "{\\"processId\\":\\"processId\\",\\"elpaId\\":null,\\"resourceId\\":null,\\"antrag\\":{\\"allgemeineDaten\\":{\\"beratungsprotokollVollstaendig\\":null,\\"eingangsdatum\\":null,\\"antragstellungsdatum\\":null,\\"gesellschaft\\":null,\\"sipId\\":null,\\"unterschriftVn\\":null,\\"neese\\":null,\\"antragsherkunft\\":null,\\"bestandsgeschaeft\\":null},\\"antragsteller\\":{\\"personendaten\\":{\\"type\\":\\"NatuerlichePersonendaten\\",\\"anrede\\":\\"Frau\\",\\"nachname\\":\\"Mustermann\\",\\"vorname\\":\\"Sabine\\",\\"namenszusatz\\":null,\\"adelstitel\\":null,\\"akademischerTitel\\":\\"Dr.\\",\\"familienstand\\":\\"MARRIED\\",\\"geburtsdatum\\":\\"2000-01-01\\",\\"staatsangehoerigkeit\\":\\"DE\\",\\"beruflicheTaetigkeit\\":\\"beruflicheTaetigkeit\\",\\"berufsstellung\\":\\"berufsstellung\\",\\"branche\\":null},\\"partnerIdentifikationsdaten\\":{\\"panr\\":\\"panr\\",\\"vnr\\":\\"vnr\\",\\"paid\\":\\"paid\\"},\\"adresse\\":{\\"strasse\\":\\"Neue Rabenstr.\\",\\"plz\\":\\"20354\\",\\"hausnummer\\":\\"15\\",\\"ort\\":\\"Hamburg\\",\\"adressInfo\\":null,\\"land\\":\\"DE\\"},\\"kontaktdaten\\":{\\"telefon\\":null,\\"fax\\":null,\\"email\\":null,\\"mobil\\":null},\\"einwilligungenUwg\\":{\\"telefonKontakt\\":null,\\"smsKontakt\\":null,\\"faxKontakt\\":null,\\"emailKontakt\\":null}},\\"versicherungsdaten\\":null,\\"vermittlerdaten\\":{\\"name\\":null,\\"gd\\":null,\\"btr\\":null,\\"adpAnteilList\\":null,\\"externeOrdnungsbegriffe\\":null,\\"antragsGd\\":null},\\"zahlungsdaten\\":{\\"zahlungsart\\":null,\\"zahlungsweise\\":null}},\\"metadaten\\":{\\"rohdatenUuid\\":\\"myRohdatenUuid\\",\\"antragDokumentId\\":null,\\"provisionsantragsNummer\\":null,\\"prozessVersion\\":null,\\"antragsStatus\\":null,\\"vertriebsKanal\\":\\"UNBEKANNT\\"}}",
+				  "payload": "{\\"processId\\":\\"processId\\",\\"elpaId\\":null,\\"resourceId\\":null,\\"antrag\\":{\\"allgemeineDaten\\":{\\"beratungsprotokollVollstaendig\\":null,\\"eingangsdatum\\":null,\\"antragstellungsdatum\\":null,\\"gesellschaft\\":null,\\"sipId\\":null,\\"unterschriftVn\\":null,\\"neese\\":null},\\"antragsteller\\":{\\"personendaten\\":{\\"type\\":\\"NatuerlichePersonendaten\\",\\"anrede\\":\\"Frau\\",\\"nachname\\":\\"Mustermann\\",\\"name1\\":null,\\"vorname\\":\\"Sabine\\",\\"namenszusatz\\":null,\\"adelstitel\\":null,\\"akademischerTitel\\":\\"Dr.\\",\\"familienstand\\":\\"MARRIED\\",\\"geburtsdatum\\":[2000,1,1],\\"staatsangehoerigkeit\\":\\"DE\\",\\"beruflicheTaetigkeit\\":\\"beruflicheTaetigkeit\\",\\"berufsstellung\\":\\"berufsstellung\\",\\"branche\\":null},\\"partnerIdentifikationsdaten\\":{\\"panr\\":\\"panr\\",\\"vnr\\":\\"vnr\\",\\"paid\\":\\"paid\\"},\\"adresse\\":{\\"strasse\\":\\"Neue Rabenstr.\\",\\"plz\\":\\"20354\\",\\"hausnummer\\":\\"15\\",\\"ort\\":\\"Hamburg\\",\\"adressInfo\\":null,\\"land\\":\\"DE\\"},\\"kontaktdaten\\":{\\"telefon\\":null,\\"fax\\":null,\\"email\\":null,\\"mobil\\":null},\\"einwilligungenUwg\\":{\\"telefonKontakt\\":null,\\"smsKontakt\\":null,\\"faxKontakt\\":null,\\"emailKontakt\\":null}},\\"versicherungsdaten\\":null,\\"vermittlerdaten\\":{\\"name\\":null,\\"gd\\":null,\\"btr\\":null,\\"adpAnteilList\\":null,\\"externeOrdnungsbegriffe\\":null},\\"zahlungsdaten\\":{\\"zahlungsart\\":null,\\"zahlungsweise\\":null}},\\"metadaten\\":{\\"rohdatenUuid\\":\\"myRohdatenUuid\\",\\"antragDokumentId\\":null,\\"gdAntragsId\\":null,\\"prozessVersion\\":null,\\"antragsStatus\\":null,\\"vertriebsKanal\\":null}}",
 				  "payloadMediaType": "application/json",
 				  "error": "error",
 				  "stackTrace": "stacktrace",
@@ -307,7 +302,7 @@ class DltManagerControllerTest {
 		void withKnownDltEventIdWhenResendPapierantragFails() throws Exception {
 			// given
 			when(dltEventPersistenceAdapter.findDltEventById(DLT_EVENT1_ID)).thenReturn(Optional.of(SharedTestData.DLT_EVENT_1));
-			doThrow(new FeignException.ServiceUnavailable("Mock exception", createMockRequest(), new byte[]{}, Map.of()))
+			doThrow(new FeignException.ServiceUnavailable("Mock exception", createMockRequest(Request.HttpMethod.POST), new byte[]{}, Map.of()))
 				.when(papierantragEingangAdapter).resendPapierantrag("myRohdatenUuid");
 
 			// when
@@ -368,15 +363,15 @@ class DltManagerControllerTest {
 		}
 	}
 
-	private Request createMockRequest() {
+	private Request createMockRequest(Request.HttpMethod httpMethod) {
 		var url = "http://example.com/test/mock";
-		return feign.Request.create(Request.HttpMethod.POST, url, Map.of(), feign.Request.Body.create(new byte[]{}), null);
+		return feign.Request.create(httpMethod, url, Map.of(), feign.Request.Body.create(new byte[]{}), null);
 	}
 
 	String asJsonString(Object object) {
 		try {
-			return jsonMapper.writeValueAsString(object);
-		} catch (JacksonException e) {
+			return objectMapper.writeValueAsString(object);
+		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
 	}

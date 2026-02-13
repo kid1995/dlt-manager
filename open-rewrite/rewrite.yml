@@ -1,9 +1,48 @@
+
 ---
+# =============================================================================
+# Extended OpenRewrite Recipe for ELPA Spring Boot 4 Migration
+# =============================================================================
+#
+# CHANGES in dieser Version:
+#
+#   NEU  11) WireMock: @AutoConfigureWireMock → @EnableWireMock
+#   NEU  12) spring-boot-starter-test entfernen (redundant mit webmvc-test)
+#   NEU  13) Automatische Test-Starter basierend auf Main-Startern
+#   NEU  14) jwt.enabled=false in Test-Annotationen injizieren
+#
+# JACKSON 3.x ObjectMapper → JsonMapper MIGRATION:
+#
+#   The community recipe `UpgradeJackson_2_3` already includes
+#   `UseFormatAlignedObjectMappers`, which does exactly what you want:
+#
+#     BEFORE (Jackson 2):
+#       ObjectMapper mapper = new ObjectMapper();
+#       mapper.registerModule(new JavaTimeModule());
+#
+#     AFTER (Jackson 3):
+#       JsonMapper mapper = JsonMapper.builder().build();
+#       // No JavaTimeModule needed – built-in!
+#
+#   Sub-recipes: UseFormatAlignedObjectMappers, RemoveBuiltInModuleRegistrations,
+#   UseModernDateTimeSerialization, UpgradeJackson_2_3_PackageChanges,
+#   SimplifyJacksonExceptionCatch, and more.
+#
+# Usage:
+#   1. Place this file at: config/rewrite.yml
+#   2. Add OpenRewrite plugin + dependencies to root build.gradle
+#   3. Run: ./gradlew rewriteDryRun   (preview)
+#   4. Run: ./gradlew rewriteRun      (apply)
+# =============================================================================
 type: specs.openrewrite.org/v1beta/recipe
 name: de.signaliduna.elpa.UpgradeToSpringBoot4
 displayName: ELPA – Migrate to Spring Boot 4.0 (Extended)
 description: |
-  Extends the OpenRewrite community Spring Boot 4.0
+  Extends the OpenRewrite community Spring Boot 4.0 recipe with ELPA-specific
+  migrations: Jackson 3.x (ObjectMapper→JsonMapper + auto-modules),
+  autoconfigure relocations, Spring Cloud 2025, spring-addons 9.x,
+  springwolf-kafka 2.x, WireMock migration, automatic test-starter pairing,
+  jwt.enabled=false injection, and more.
 tags:
   - spring
   - boot
@@ -11,51 +50,63 @@ tags:
 
 recipeList:
 
+  # ===========================================================================
+  # 1) COMMUNITY BASE – Spring Boot 4.0
+  # ===========================================================================
   - org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0
+
+  # ===========================================================================
+  # 2) JACKSON 2.x → 3.x (NOT in community Boot recipe)
+  # ===========================================================================
   - org.openrewrite.java.jackson.UpgradeJackson_2_3
-  # @DataJpaTest → new package
+
+  # ===========================================================================
+  # 3) SPRING BOOT 4 AUTOCONFIGURE PACKAGE RELOCATIONS
+  # ===========================================================================
   - org.openrewrite.java.ChangeType:
       oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
       newFullyQualifiedTypeName: org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
-  # @WebMvcTest → new package
   - org.openrewrite.java.ChangeType:
       oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
       newFullyQualifiedTypeName: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
+      newFullyQualifiedTypeName: org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest
 
+  # ===========================================================================
+  # 4) TESTCONTAINERS 2.x – DB-specific
+  # ===========================================================================
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: org.testcontainers
       oldArtifactId: postgresql
       newGroupId: org.testcontainers
       newArtifactId: testcontainers-postgresql
-
   - org.openrewrite.java.ChangeType:
       oldFullyQualifiedTypeName: org.testcontainers.containers.PostgreSQLContainer
       newFullyQualifiedTypeName: org.testcontainers.postgresql.PostgreSQLContainer
-
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: org.testcontainers
       oldArtifactId: mongodb
       newGroupId: org.testcontainers
       newArtifactId: testcontainers-mongodb
-
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: org.testcontainers
       oldArtifactId: kafka
       newGroupId: org.testcontainers
       newArtifactId: testcontainers-kafka
 
-  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
-      groupId: org.springframework.cloud
-      artifactId: "*"
-      newVersion: 2025.1.x
-      overrideManagedVersion: false
-
+  # ===========================================================================
+  # 5) SPRING CLOUD → 2025.1.0
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: org.springframework.cloud
       artifactId: spring-cloud-dependencies
       newVersion: 2025.1.x
       overrideManagedVersion: true
 
+  # ===========================================================================
+  # 6) SPRING-ADDONS → 9.x
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: com.c4-soft.springaddons
       artifactId: spring-addons-starter-oidc
@@ -66,25 +117,349 @@ recipeList:
       artifactId: spring-addons-starter-oidc-test
       newVersion: 9.x
       overrideManagedVersion: true
+
+  # ===========================================================================
+  # 7) SPRINGWOLF-KAFKA → 2.x
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: io.github.springwolf
       artifactId: springwolf-kafka
       newVersion: 2.x
       overrideManagedVersion: true
+
+  # ===========================================================================
+  # 8) LOGSTASH-LOGBACK-ENCODER → 9.x
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: net.logstash.logback
       artifactId: logstash-logback-encoder
       newVersion: 9.x
       overrideManagedVersion: true
 
+  # ===========================================================================
+  # 9) WIREMOCK SPRING BOOT → 4.x (Version Upgrade)
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: org.wiremock.integrations
       artifactId: wiremock-spring-boot
-      newVersion: 4.0.9
+      newVersion: 4.x
       overrideManagedVersion: true
 
+  # ===========================================================================
+  # 10) MAPSTRUCT → latest 1.6.x
+  # ===========================================================================
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: org.mapstruct
       artifactId: "*"
       newVersion: 1.6.x
       overrideManagedVersion: true
+
+  # ===========================================================================
+  # 10b) ELPA TEAM LIBRARIES – Update nur wenn bereits vorhanden
+  # ===========================================================================
+  # UpgradeDependencyVersion ändert die Version NUR wenn die Dependency
+  # bereits im Projekt existiert UND eine niedrigere Version hat.
+  # Neue Dependencies werden NICHT hinzugefügt.
+
+  # elpa4-model → 1.1.0
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: de.signaliduna.elpa
+      artifactId: elpa4-model
+      newVersion: 1.1.0
+      overrideManagedVersion: true
+
+  # application-store-client → 0.1.0
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: de.signaliduna.elpa.application-store
+      artifactId: application-store-client
+      newVersion: 0.1.0
+      overrideManagedVersion: true
+
+  # jwt-adapter → 2.5.0
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: de.signaliduna.elpa
+      artifactId: jwt-adapter
+      newVersion: 2.5.0
+      overrideManagedVersion: true
+
+  # hint-client → 2.3.3
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: de.signaliduna.elpa.hint
+      artifactId: hint-client
+      newVersion: 2.3.3
+      overrideManagedVersion: true
+
+  # ===========================================================================
+  # 11) WIREMOCK MIGRATION: spring-cloud-contract-wiremock → wiremock-spring-boot
+  # ===========================================================================
+  #
+  # VORHER:
+  #   testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+  #   @AutoConfigureWireMock(port = 0)
+  #
+  # NACHHER:
+  #   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.x'
+  #   @EnableWireMock
+  #
+  # ---------------------------------------------------------------------------
+
+  # 11a) Dependency: spring-cloud-contract-wiremock → wiremock-spring-boot
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.springframework.cloud
+      oldArtifactId: spring-cloud-contract-wiremock
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+
+  # 11b) Annotation: @AutoConfigureWireMock → @EnableWireMock
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+      newFullyQualifiedTypeName: org.wiremock.spring.EnableWireMock
+      ignoreDefinition: true
+
+  # 11c) Remove port attribute (nicht vorhanden in @EnableWireMock)
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: port
+
+  # 11d) Remove stubs attribute (wird über @ConfigureWireMock gesteuert)
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: stubs
+
+  # 11e) Remove files attribute
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: files
+
+  # 11f) Falls noch alte WireMock-Core @WireMockTest benutzt wird
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: com.github.tomakehurst.wiremock.junit5.WireMockTest
+      newFullyQualifiedTypeName: org.wiremock.spring.EnableWireMock
+      ignoreDefinition: true
+
+  # 11g) WireMockTest-Attribute entfernen
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: httpPort
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: httpsPort
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: httpsEnabled
+  - org.openrewrite.java.RemoveAnnotationAttribute:
+      annotationType: org.wiremock.spring.EnableWireMock
+      attributeName: proxyMode
+
+  # 11h) Alte WireMock-Dependency-Varianten → wiremock-spring-boot
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: com.github.tomakehurst
+      oldArtifactId: wiremock-jre8-standalone
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: com.github.tomakehurst
+      oldArtifactId: wiremock-jre8
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: com.github.tomakehurst
+      oldArtifactId: wiremock
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.wiremock
+      oldArtifactId: wiremock-standalone
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+  - org.openrewrite.java.dependencies.ChangeDependency:
+      oldGroupId: org.wiremock
+      oldArtifactId: wiremock
+      newGroupId: org.wiremock.integrations
+      newArtifactId: wiremock-spring-boot
+      newVersion: 4.x
+
+  # ===========================================================================
+  # 12) spring-boot-starter-test ENTFERNEN (redundant mit webmvc-test etc.)
+  # ===========================================================================
+  # In Spring Boot 4 bringt spring-boot-starter-webmvc-test bereits alles mit.
+  # spring-boot-starter-test ist daher nicht mehr nötig.
+  - org.openrewrite.java.dependencies.RemoveDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-test
+
+  # ===========================================================================
+  # 13) AUTOMATISCHE TEST-STARTER – Wenn Main-Starter vorhanden, füge
+  #     passenden Test-Starter hinzu (idempotent, unabhängig vom Vorhandensein)
+  # ===========================================================================
+  #
+  # Logik: onlyIfUsing prüft ob Klassen aus dem Starter im Code referenziert
+  #        werden. Wenn ja → Test-Starter hinzufügen.
+
+  # 13a) webmvc → webmvc-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-webmvc-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: org.springframework.web.bind.annotation.*
+      acceptTransitive: true
+
+  # 13b) data-jpa → data-jpa-test (deckt auch Flyway-Tests ab)
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-data-jpa-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: jakarta.persistence.*
+      acceptTransitive: true
+
+  # 13c) data-mongodb → data-mongodb-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-data-mongodb-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: org.springframework.data.mongodb.*
+      acceptTransitive: true
+
+  # 13d) data-mongodb-reactive → data-mongodb-reactive-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-data-mongodb-reactive-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: org.springframework.data.mongodb.core.ReactiveMongoTemplate
+      acceptTransitive: true
+
+  # 13e) actuator → actuator-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-actuator-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: org.springframework.boot.actuate.*
+      acceptTransitive: true
+
+  # 13f) security + oauth2-resource-server → security-oauth2-resource-server-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-security-oauth2-resource-server-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: org.springframework.security.oauth2.server.resource.*
+      acceptTransitive: true
+
+  # 13g) validation → validation-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.boot
+      artifactId: spring-boot-starter-validation-test
+      version: 4.x
+      scope: test
+      onlyIfUsing: jakarta.validation.*
+      acceptTransitive: true
+
+  # 13h) micrometer-tracing → tracing-test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: io.micrometer
+      artifactId: micrometer-tracing-test
+      version: 1.x
+      scope: test
+      onlyIfUsing: io.micrometer.tracing.*
+      acceptTransitive: true
+
+  # 13i) opentelemetry bridge → otel test
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: io.micrometer
+      artifactId: micrometer-tracing-bridge-otel-test
+      version: 1.x
+      scope: test
+      onlyIfUsing: io.micrometer.tracing.otel.*
+      acceptTransitive: true
+
+  # 13j) cloud-stream → stream-test-binder (wenn Cloud Stream genutzt)
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.springframework.cloud
+      artifactId: spring-cloud-stream-test-binder
+      scope: test
+      onlyIfUsing: org.springframework.cloud.stream.*
+      acceptTransitive: true
+
+  # ===========================================================================
+  # 14) jwt.enabled=false IN TEST-ANNOTATIONEN INJIZIEREN
+  # ===========================================================================
+  #
+  # Fügt properties = {"jwt.enabled=false"} zu allen Spring Boot Test-Context-
+  # Annotationen hinzu. Nutzt appendArray=true um bestehende properties nicht
+  # zu überschreiben.
+  #
+  # HINWEIS: AddOrUpdateAnnotationAttribute mit appendArray funktioniert ab
+  # OpenRewrite 8.57.0+. Bei älteren Versionen wird das Attribut ggf. nicht
+  # korrekt als Array gesetzt – in dem Fall manuell nacharbeiten.
+
+  # 14a) @WebMvcTest (Spring Boot 4 relocated FQN)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14b) @WebMvcTest (altes FQN – falls noch nicht relocated)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14c) @DataJpaTest (Spring Boot 4 relocated FQN)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14d) @DataJpaTest (altes FQN)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14e) @DataMongoTest (Spring Boot 4 relocated FQN)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14f) @DataMongoTest (altes FQN)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # 14g) @SpringBootTest (FQN ändert sich nicht in Boot 4)
+  - org.openrewrite.java.AddOrUpdateAnnotationAttribute:
+      annotationType: org.springframework.boot.test.context.SpringBootTest
+      attributeName: properties
+      attributeValue: "jwt.enabled=false"
+      addOnly: true
+      appendArray: true
+
+  # ===========================================================================
+  # 15) AUFRÄUMEN – Unused Imports entfernen
+  # ===========================================================================
+  - org.openrewrite.java.RemoveUnusedImports
+

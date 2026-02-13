@@ -1,5 +1,7 @@
 package de.signaliduna.dltmanager.core.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.core.exception.DltEventAdminServiceException;
@@ -8,8 +10,6 @@ import de.signaliduna.elpa.sharedlib.model.Vorgang;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,14 +20,14 @@ public class DltEventAdminService {
 
 	private final DltEventPersistenceAdapter dltEventPersistenceAdapter;
 	private final PapierantragEingangAdapter papierantragEingangAdapter;
-	private final JsonMapper jsonMapper;
+	private final ObjectMapper objectMapper;
 
 	public DltEventAdminService(
-		DltEventPersistenceAdapter dltEventPersistenceAdapter, PapierantragEingangAdapter papierantragEingangAdapter, JsonMapper jsonMapper
+		DltEventPersistenceAdapter dltEventPersistenceAdapter, PapierantragEingangAdapter papierantragEingangAdapter, ObjectMapper objectMapper
 	) {
 		this.dltEventPersistenceAdapter = dltEventPersistenceAdapter;
 		this.papierantragEingangAdapter = papierantragEingangAdapter;
-		this.jsonMapper = jsonMapper;
+		this.objectMapper = objectMapper;
 	}
 
 	public List<DltEventWithAdminActions> getDltEvents() {
@@ -104,8 +104,8 @@ public class DltEventAdminService {
 
 	<T> T decodeDltEventPayload(DltEvent dltEvent, Class<T> targetType) {
 		try {
-			return jsonMapper.readValue(dltEvent.payload(), targetType);
-		} catch (JacksonException e) {
+			return objectMapper.readValue(dltEvent.payload(), targetType);
+		} catch (JsonProcessingException e) {
 			throw new DltEventAdminServiceException("failed to decode payload of DltEvent id " + dltEvent.dltEventId(), e);
 		}
 	}
