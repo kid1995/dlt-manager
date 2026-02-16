@@ -1,6 +1,5 @@
 package de.signaliduna.elpa.dltmanager.adapter.message.producer;
 
-import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.model.DltEventData;
 import de.signaliduna.elpa.dltmanager.adapter.message.util.MessagingUtils;
 import io.cloudevents.CloudEvent;
@@ -18,6 +17,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -38,12 +38,12 @@ public class DltTopicProducer {
 	) {
 	}
 
-	private final ObjectMapper objectMapper;
+	private final JsonMapper objectMapper;
 	private final Tracer tracer;
 	private final StreamBridge streamBridge;
 	private final DltTopicProducer.Props props;
 
-	public DltTopicProducer(StreamBridge streamBridge, Tracer tracer, ObjectMapper objectMapper, DltTopicProducer.Props props) {
+	public DltTopicProducer(StreamBridge streamBridge, Tracer tracer, JsonMapper objectMapper, DltTopicProducer.Props props) {
 		this.streamBridge = streamBridge;
 		this.tracer = tracer;
 		this.objectMapper = objectMapper;

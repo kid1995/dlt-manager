@@ -1,6 +1,5 @@
 package de.signaliduna.dltmanager.core.service;
 
-import tools.jackson.databind.ObjectMapper;
 import de.signaliduna.dltmanager.adapter.db.DltEventPersistenceAdapter;
 import de.signaliduna.dltmanager.adapter.http.client.PapierantragEingangAdapter;
 import de.signaliduna.dltmanager.core.model.DltEvent;
@@ -12,15 +11,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.json.JsonMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(
-	classes = {DltEventAdminService.class, DltEventPersistenceAdapter.class, PapierantragEingangAdapter.class, ObjectMapper.class},
+	classes = {DltEventAdminService.class, DltEventPersistenceAdapter.class, PapierantragEingangAdapter.class, JsonMapper.class},
 	webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Import(TestChannelBinderConfiguration.class)
-class DltEventAdminServiceTest {
+class
+DltEventAdminServiceTest {
 	@MockitoBean
 	DltEventPersistenceAdapter dltEventPersistenceAdapter;
 	@MockitoBean

@@ -23,16 +23,16 @@ public class DltEventPersistenceAdapter {
 	}
 
 	public Stream<DltEvent> streamAll() {
-		return dltEventRepository.streamAll().map(EntityMapper::fromDltEventEntity);
+		return dltEventRepository.findAllByOrderByLastAdminActionDesc().map(EntityMapper::fromDltEventEntity);
 	}
 
 	public Optional<DltEvent> findDltEventById(String dltEventId) {
-		return dltEventRepository.findByDltEventId(dltEventId).map(EntityMapper::fromDltEventEntity);
+		return dltEventRepository.findById(dltEventId).map(EntityMapper::fromDltEventEntity);
 	}
 
-	public DltEvent save(DltEvent dltEvent) {
+	public void save(DltEvent dltEvent) {
 		final DltEventEntity saved = dltEventRepository.save(EntityMapper.toDltEventEntity(dltEvent));
-		return EntityMapper.fromDltEventEntity(saved);
+		EntityMapper.fromDltEventEntity(saved);
 	}
 
 	public boolean updateLastAdminActionForDltEvent(String dltEventId, AdminActionHistoryItem adminActionHistoryItem) {
@@ -42,6 +42,6 @@ public class DltEventPersistenceAdapter {
 
 	public boolean deleteByDltEventId(String dltEventId) {
 		log.debug("deleting DLT event with dltEventId: {}", dltEventId);
-		return dltEventRepository.deleteByDltEventId(dltEventId);
+		return dltEventRepository.deleteByDltEventId(dltEventId) > 0;
 	}
 }

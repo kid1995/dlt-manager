@@ -6,11 +6,11 @@ module.exports = {
   transform: {
     '^.+\\.(ts|mjs|js|html)$': ['ts-jest', {
       tsconfig: '<rootDir>/tsconfig.spec.json',
-      useESM: false, // set true if using ESM
+      useESM: false,
       isolatedModules: true
     }]
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  transformIgnorePatterns: ['node_modules/(?!(@angular|angular-oauth2-oidc|.*\\.mjs$))'],
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
@@ -22,5 +22,4 @@ module.exports = {
   ],
   testEnvironment: 'jsdom'
 };
-
 
