@@ -157,18 +157,33 @@ const checkRenderedListAfterSort = (
   header: TableHeaderDef,
   columnIndex: number,
   testData: readonly DltEventOverviewItem[],
-  direction: 'asc' | 'desc',
+  direction: 'asc' | 'desc'
 ) => {
-  const headerSortKey = header.sortKey as string
-  // check result
-  cy.get('si-table-body si-table-row').then((rows) => {
-    const renderedValues = extractColumnTextFromRows(rows, columnIndex)
+  const headerSortKey = header.sortKey as string;
 
+  // *check result*
+  cy.get('si-table-body si-table-row').then((rows) => {
+    // 1. Get the actual values from the UI
+    const renderedValues = extractColumnTextFromRows(rows, columnIndex);
+
+    // 2. Get the expected values from your test data
     const expectedSortedValues = createExpectedSortedList(
       testData,
       headerSortKey,
-      direction,
-    )
-    expect(renderedValues).to.ordered.members(expectedSortedValues)
-  })
-}
+      direction
+    );
+
+    // 3. Normalize BOTH arrays to make whitespace consistent
+    // This regex replaces any standard whitespace (\s) or the specific
+    // narrow non-breaking space (\u202F) with a single regular space.
+    const normalizedRenderedValues = renderedValues.map((value) =>
+      value.replace(/[\s\u202F]/g, ' ')
+    );
+    const normalizedExpectedValues = expectedSortedValues.map((value) =>
+      value.replace(/[\s\u202F]/g, ' ')
+    );
+
+    // 4. Assert against the normalized arrays
+    expect(normalizedRenderedValues).to.ordered.members(normalizedExpectedValues);
+  });
+};

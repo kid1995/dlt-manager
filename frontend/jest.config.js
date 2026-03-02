@@ -12,6 +12,9 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(@angular|angular-oauth2-oidc|.*\\.mjs$))'],
   moduleFileExtensions: ['ts', 'html', 'js', 'json'],
+  moduleNameMapper: {
+  "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+  },
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.ts',
