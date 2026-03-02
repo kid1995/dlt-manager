@@ -1,7 +1,160 @@
-npm run ci:test
+ ✘ u167653@IX01839984  ~/Documents/elpa-code/dlt-manager/frontend  ↱ ELPA4-506-update-angular-21 ±  npm run ci:test
 
 > dltmanager-ui@0.0.0 ci:test
-> ng test --coverage
+> npx jest --coverage
 
-Error: Schema validation failed with the following errors:
-  Data path "/configPath" must be array.
+ FAIL  src/app/util/object-utils.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/u167653/Documents/elpa-code/dlt-manager/frontend/node_modules/@angular/core/fesm2022/core.mjs:7
+    import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, NgZone, ChangeDetectionScheduler, INTERNAL_APPLICATION_ERROR_HANDLER, ɵɵdefineInjectable as __defineInjectable, ZONELESS_ENABLED, ENVIRONMENT_INITIALIZER, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, makeEnvironmentProviders, PendingTasksInternal, formatRuntimeError, ERROR_DETAILS_PAGE_BASE_URL, PROVIDED_ZONELESS, stringify, ɵɵinject as __inject, errorHandlerEnvironmentInitializer, INJECTOR_SCOPE, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, unwrapRNode, CLEANUP, DOCUMENT, DOC_PAGE_BASE_URL, DEBUG_TASK_TRACKER, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, getComponentDef, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitAfterRenderEffectPhaseCreatedEvent, getNullInjector } from './_effect-chunk2.mjs';
+    ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+    > 1 | import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+        | ^
+      2 | setupZoneTestEnv();
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1318:40)
+      at Object.<anonymous> (node_modules/jest-preset-angular/setup-env/zone/index.js:4:77)
+      at Object.<anonymous> (setup-jest.ts:1:1)
+
+ FAIL  src/app/services/auth/auth.service.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/u167653/Documents/elpa-code/dlt-manager/frontend/node_modules/@angular/core/fesm2022/core.mjs:7
+    import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, NgZone, ChangeDetectionScheduler, INTERNAL_APPLICATION_ERROR_HANDLER, ɵɵdefineInjectable as __defineInjectable, ZONELESS_ENABLED, ENVIRONMENT_INITIALIZER, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, makeEnvironmentProviders, PendingTasksInternal, formatRuntimeError, ERROR_DETAILS_PAGE_BASE_URL, PROVIDED_ZONELESS, stringify, ɵɵinject as __inject, errorHandlerEnvironmentInitializer, INJECTOR_SCOPE, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, unwrapRNode, CLEANUP, DOCUMENT, DOC_PAGE_BASE_URL, DEBUG_TASK_TRACKER, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, getComponentDef, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitAfterRenderEffectPhaseCreatedEvent, getNullInjector } from './_effect-chunk2.mjs';
+    ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+    > 1 | import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+        | ^
+      2 | setupZoneTestEnv();
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1318:40)
+      at Object.<anonymous> (node_modules/jest-preset-angular/setup-env/zone/index.js:4:77)
+      at Object.<anonymous> (setup-jest.ts:1:1)
+
+ FAIL  src/app/services/dlt-manager/converter/dlt-manager-model-converter.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/u167653/Documents/elpa-code/dlt-manager/frontend/node_modules/@angular/core/fesm2022/core.mjs:7
+    import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, NgZone, ChangeDetectionScheduler, INTERNAL_APPLICATION_ERROR_HANDLER, ɵɵdefineInjectable as __defineInjectable, ZONELESS_ENABLED, ENVIRONMENT_INITIALIZER, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, makeEnvironmentProviders, PendingTasksInternal, formatRuntimeError, ERROR_DETAILS_PAGE_BASE_URL, PROVIDED_ZONELESS, stringify, ɵɵinject as __inject, errorHandlerEnvironmentInitializer, INJECTOR_SCOPE, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, unwrapRNode, CLEANUP, DOCUMENT, DOC_PAGE_BASE_URL, DEBUG_TASK_TRACKER, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, getComponentDef, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitAfterRenderEffectPhaseCreatedEvent, getNullInjector } from './_effect-chunk2.mjs';
+    ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+    > 1 | import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+        | ^
+      2 | setupZoneTestEnv();
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1318:40)
+      at Object.<anonymous> (node_modules/jest-preset-angular/setup-env/zone/index.js:4:77)
+      at Object.<anonymous> (setup-jest.ts:1:1)
+
+ FAIL  src/app/guards/auth.guard.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation, specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/u167653/Documents/elpa-code/dlt-manager/frontend/node_modules/@angular/core/fesm2022/core.mjs:7
+    import { RuntimeError, InjectionToken, getCurrentTNode, assertInInjectionContext, signalAsReadonlyFn, assertNgModuleType, Injector, inject, NgZone, ChangeDetectionScheduler, INTERNAL_APPLICATION_ERROR_HANDLER, ɵɵdefineInjectable as __defineInjectable, ZONELESS_ENABLED, ENVIRONMENT_INITIALIZER, SCHEDULE_IN_ROOT_ZONE, SCHEDULE_IN_ROOT_ZONE_DEFAULT, makeEnvironmentProviders, PendingTasksInternal, formatRuntimeError, ERROR_DETAILS_PAGE_BASE_URL, PROVIDED_ZONELESS, stringify, ɵɵinject as __inject, errorHandlerEnvironmentInitializer, INJECTOR_SCOPE, runInInjectionContext, provideEnvironmentInitializer, ErrorHandler, _global, unwrapRNode, CLEANUP, DOCUMENT, DOC_PAGE_BASE_URL, DEBUG_TASK_TRACKER, isComponentHost, getComponentLViewByIndex, getLView, DECLARATION_COMPONENT_VIEW, ɵɵdefineInjector as __defineInjector, isLContainer, HOST, hasI18n, unwrapLView, RENDERER, assertTNode, isProjectionTNode, getComponentDef, PARENT, isRootView, HEADER_OFFSET, TVIEW, CONTEXT, CONTAINER_HEADER_OFFSET, isLView, getTNode, assertNotInReactiveContext, ViewContext, DestroyRef, setInjectorProfilerContext, emitAfterRenderEffectPhaseCreatedEvent, getNullInjector } from './_effect-chunk2.mjs';
+    ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+    > 1 | import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+        | ^
+      2 | setupZoneTestEnv();
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1318:40)
+      at Object.<anonymous> (node_modules/jest-preset-angular/setup-env/zone/index.js:4:77)
+      at Object.<anonymous> (setup-jest.ts:1:1)

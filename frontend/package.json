@@ -9,11 +9,11 @@
     "ci:build:abn": "ng build --configuration abnahme",
     "ci:build:tst": "ng build --configuration intern",
     "ci:audit": "npm audit --registry=https://registry.npmjs.org --audit-level=high --omit=dev",
-    "ci:test": "ng test --coverage",
+    "ci:test": "npx jest --coverage",
     "ci:e2e": "cypress run --component",
     "ci:lint": "ng lint",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --coverage --watch",
+    "test": "npx jest --watch",
     "lint": "ng lint",
     "e2e": "cypress open --component -b electron",
     "audit-fix": "npm audit fix --registry=https://registry.npmjs.org --audit-level=high --omit=dev"
