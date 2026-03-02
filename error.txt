@@ -1,0 +1,7 @@
+npm run ci:test
+
+> dltmanager-ui@0.0.0 ci:test
+> ng test --coverage
+
+Error: Schema validation failed with the following errors:
+  Data path "/configPath" must be array.
