@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom'
 import { map } from 'rxjs/operators'
@@ -14,9 +14,10 @@ import { DltEventFullItem } from './model/DltEventFullItem'
 })
 export class DltManagerService {
   private readonly apiUrl: string
-
-  constructor(private http: HttpClient, @Inject(APP_CONFIG) private appConfig: AppConfig) {
-    this.apiUrl = appConfig.backendUrl.replace(/\/$/, "")
+  private readonly http = inject(HttpClient);
+  private appConfig: AppConfig = inject(APP_CONFIG);
+  constructor() {
+    this.apiUrl = this.appConfig.backendUrl.replace(/\/$/, "")
   }
 
   public getDltEventOverviewItems(): Promise<readonly DltEventOverviewItem[]> {

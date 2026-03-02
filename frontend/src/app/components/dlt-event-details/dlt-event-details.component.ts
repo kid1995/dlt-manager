@@ -28,13 +28,17 @@ export class DltEventFullItemComponent implements OnInit {
   public dltEvent?: DltEventFullItem
   public dltEventRawJson?: string
 
+  private readonly dltManagerService = inject(DltManagerService)
+  private readonly changeDetector = inject(ChangeDetectorRef)
+  private readonly logger = inject(NGXLogger)
+
   dltEventId!: string
 
   readonly metadataFields: { key: string; label: string; pipe?: string }[] = [
     { key: 'dltEventId', label: 'DLT Event ID' },
     { key: 'originalEventId', label: 'Original Event ID' },
     { key: 'serviceName', label: 'Service' },
-    { key: 'addToDltTimestamp', label: 'Time', pipe: "date-short" },
+    { key: 'addToDltTimestamp', label: 'Time', pipe: 'date-short' },
     { key: 'traceId', label: 'Trace ID' },
     { key: 'error', label: 'Error' },
   ]
@@ -48,11 +52,7 @@ export class DltEventFullItemComponent implements OnInit {
     { key: 'statusError', label: 'Status detail' },
   ]
 
-  constructor(
-    private readonly dltManagerService: DltManagerService,
-    private readonly changeDetector: ChangeDetectorRef,
-    private readonly logger: NGXLogger,
-  ) {
+  constructor() {
     if (this.route) {
       this.dltEventId = this.route.snapshot.params['dltEventId']
     }

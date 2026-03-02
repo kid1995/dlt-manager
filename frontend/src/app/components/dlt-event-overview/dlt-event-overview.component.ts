@@ -3,7 +3,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  CUSTOM_ELEMENTS_SCHEMA, inject,
+  CUSTOM_ELEMENTS_SCHEMA,
+  inject,
   OnInit,
 } from '@angular/core'
 import { MatTooltipModule } from '@angular/material/tooltip'
@@ -14,7 +15,7 @@ import { NGXLogger } from 'ngx-logger'
 import { DltManagerService } from '../../services/dlt-manager/dlt-manager.service'
 import { DltEventOverviewItem } from '../../services/dlt-manager/model/DltEventOverviewItem'
 import ObjectUtils from '../../util/object-utils'
-import {Router} from "@angular/router";
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-admin',
@@ -26,15 +27,13 @@ import {Router} from "@angular/router";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DltEventOverviewComponent implements OnInit {
-  private readonly router = inject(Router);
+  private readonly router = inject(Router)
   dltEventItems: readonly DltEventOverviewItem[] = []
   errorMessage?: string
 
-  constructor(
-    private readonly dltManagerService: DltManagerService,
-    private readonly changeDetector: ChangeDetectorRef,
-    private readonly logger: NGXLogger,
-  ) {}
+  private readonly dltManagerService = inject(DltManagerService)
+  private readonly changeDetector = inject(ChangeDetectorRef)
+  private readonly logger = inject(NGXLogger)
 
   public headerDefs: readonly TableHeaderDef[] = [
     {

@@ -1,5 +1,4 @@
 import {
-  Inject,
   inject,
   Injectable,
   OnDestroy,
@@ -26,8 +25,7 @@ export class AuthService implements OnDestroy {
   private _router = inject(Router)
   private _logger = inject(NGXLogger)
   private _oauthEventSubscription: Subscription = Subscription.EMPTY
-
-  constructor(@Inject(APP_CONFIG) private appConfig: AppConfig) {}
+  private appConfig: AppConfig = inject(APP_CONFIG);
 
   ngOnDestroy(): void {
     this._oauthEventSubscription.unsubscribe()
@@ -120,11 +118,11 @@ export class AuthService implements OnDestroy {
       return this.handleIsNotAuthenticated()
     }
     switch (event?.type) {
-      case 'token_received':
+      case 'token_received': {
         this.isAuthenticatedSignal.set(true)
-        // Add a fallback to '/' if state is undefined
         const targetUrl = (this._oauthService.state as string) || '/'
         return this._router.navigateByUrl(targetUrl)
+      }
 
       case 'token_expires':
         return this.handleIsNotAuthenticated()

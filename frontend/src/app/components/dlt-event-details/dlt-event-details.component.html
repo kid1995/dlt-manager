@@ -3,23 +3,13 @@
 <div class="icon-bar">
   <div class="items-left">
     <a href="/dlt-event-overview">
-      <si-button
-        theme="ghost"
-        variant="icon-only"
-        [matTooltip]="'Back to DLT event overview'"
-      >
+      <si-button theme="ghost" variant="icon-only" [matTooltip]="'Back to DLT event overview'">
         <si-button-icon svg="functionalArrowLeftBig" collection="navigation" />
       </si-button>
     </a>
   </div>
-
   <div class="items-right">
-    <si-button
-      theme="ghost"
-      variant="icon-only"
-      [matTooltip]="'Refresh DLT detail data'"
-      (click)="refresh()"
-    >
+    <si-button theme="ghost" variant="icon-only" [matTooltip]="'Refresh DLT detail data'" (click)="refresh()">
       <si-button-icon svg="functionalSync" collection="navigation" />
     </si-button>
   </div>
@@ -28,38 +18,35 @@
 <br />
 <si-heading [size]="100">Event Metadata</si-heading>
 <div class="key-value-data-container">
-  <ng-container *ngFor="let field of metadataFields">
+  @for (field of metadataFields; track field.key) {
     <si-key-value-multitype [keyPosition]="'aside'">
       <div slot="key">{{ field.label }}</div>
       <div slot="value">
-        <ng-container [ngSwitch]="field.pipe">
-          <ng-container *ngSwitchCase="'date-short'">
-            {{
-              extractValue(dltEvent, field.key)
-                | date: 'short' : undefined : 'de'
-            }}
-          </ng-container>
-          <ng-container *ngSwitchDefault>
+        @switch (field.pipe) {
+          @case ('date-short') {
+            {{ extractValue(dltEvent, field.key) | date: 'short' : undefined : 'de' }}
+          }
+          @default {
             {{ extractValue(dltEvent, field.key) }}
-          </ng-container>
-        </ng-container>
+          }
+        }
       </div>
     </si-key-value-multitype>
-  </ng-container>
+  }
 </div>
 
 @if (dltEvent?.lastAdminAction) {
   <br />
   <si-heading [size]="100">Last Admin Action</si-heading>
   <div class="key-value-data-container">
-    <ng-container *ngFor="let field of lastAdminActionFields">
+    @for (field of lastAdminActionFields; track field.key) {
       <si-key-value-multitype [keyPosition]="'aside'">
         <div slot="key">{{ field.label }}</div>
         <div slot="value">
           {{ extractValue(dltEvent?.lastAdminAction, field.key) }}
         </div>
       </si-key-value-multitype>
-    </ng-container>
+    }
   </div>
 }
 
@@ -74,3 +61,5 @@
 <si-expander title="Stacktrace" [disableTransition]="true">
   <pre class="code">{{ dltEvent?.stackTrace }}</pre>
 </si-expander>
+
+
