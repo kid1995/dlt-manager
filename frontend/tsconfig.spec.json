@@ -1,11 +1,15 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "module": "Commonjs",
-    "types": ["jest"]
+    "module": "CommonJS",
+    "target": "ES2022", 
+    "types": ["jest", "node"],
+    "allowJs": true,          // Required for ts-jest to process .mjs files
+    "esModuleInterop": true,  // Required for ESM/CJS interop
+    "skipLibCheck": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts", "setup-jest.ts"]
 }
+

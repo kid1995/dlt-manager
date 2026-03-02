@@ -8,7 +8,7 @@ import { NGXLogger } from 'ngx-logger'
 describe('AuthService Test', () => {
   let authService: AuthService;
   let oauthServiceMock: jest.Mocked<OAuthService>;
-  const ngxLogger = jest.Mocked<NGXLogger>;
+  let ngxLogger: jest.Mocked<NGXLogger>;
   let mockEventsSubject = new Subject<OAuthEvent>();
   const mockConfig: any = {    
     oidc: {

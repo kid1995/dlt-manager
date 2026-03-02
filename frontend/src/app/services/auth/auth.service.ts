@@ -122,7 +122,9 @@ export class AuthService implements OnDestroy {
     switch (event?.type) {
       case 'token_received':
         this.isAuthenticatedSignal.set(true)
-        return this._router.navigateByUrl(this._oauthService.state as string)
+        // Add a fallback to '/' if state is undefined
+        const targetUrl = (this._oauthService.state as string) || '/'
+        return this._router.navigateByUrl(targetUrl)
 
       case 'token_expires':
         return this.handleIsNotAuthenticated()
