@@ -20,7 +20,16 @@ public record DltEventData(
 	String error,
 	@Nullable String stackTrace
 ) {
-
+    
+    /**
+     * PII-safe: payload and stackTrace may contain personal data.
+     */
+    @Override
+    public String toString() {
+        return "DltEventData{originalEventId=%s, serviceName=%s, topic=%s, addToDltTimestamp=%s}"
+                .formatted(originalEventId, serviceName, topic,addToDltTimestamp);
+    }
+    
 	public Builder toBuilder() {
 		return new Builder(this);
 	}

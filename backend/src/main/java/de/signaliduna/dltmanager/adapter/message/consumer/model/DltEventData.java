@@ -9,15 +9,23 @@ import java.time.LocalDateTime;
  * the service consuming the DLT message needs to know the model classes of the original event.
  */
 public record DltEventData(
-	String originalEventId,
-	String serviceName,
-	LocalDateTime addToDltTimestamp,
-	@Nullable String topic,
-	@Nullable String partition,
-	@Nullable String traceId,
-	String payload,
-	String payloadMediaType,
-	String error,
-	@Nullable String stackTrace
+        String originalEventId,
+        String serviceName,
+        LocalDateTime addToDltTimestamp,
+        @Nullable String topic,
+        @Nullable String partition,
+        @Nullable String traceId,
+        String payload,
+        String payloadMediaType,
+        String error,
+        @Nullable String stackTrace
 ) {
+    /**
+     * PII-safe: payload, error and stackTrace are never included in toString().
+     */
+    @Override
+    public String toString() {
+        return "DltEvent{originalEventId=%s, serviceName=%s, topic=%s,addToDltTimestamp=%s}"
+                .formatted(originalEventId, serviceName, topic, addToDltTimestamp);
+    }
 }

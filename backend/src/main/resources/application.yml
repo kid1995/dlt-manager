@@ -41,9 +41,34 @@ spring:
             connectTimeout: 5000
             readTimeout: 5000
             loggerLevel: basic
-  mongodb.database: mongodb
-  mongodb.uri: mongodb://${MONGODB_USER:mongouser}:${MONGODB_PASSWORD:mongopass}@${MONGODB_HOSTS:localhost:27017}/mongodb?${MONGODB_OPTIONS:=mongodb}
-  mongodb.representation.uuid: standard
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB_NAME:dltmanager}}
+    username: ${POSTGRES_USER:db_user}
+    password: ${POSTGRES_PASSWORD:db_password}
+    hikari:
+      maximum-pool-size: ${DATABASE_CONNECTION_POOL_MAX_SIZE:4}
+      minimum-idle: ${DATABASE_CONNECTION_POOL_MIN_SIZE:1}
+      idle-timeout: 30000
+      schema: ${postgres.schema}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: ${postgres.schema}
+    database: postgresql
+    open-in-view: false
+
+  flyway:
+    locations: ${FLYWAY_LOCATIONS:db/migration}
+    schemas: ${postgres.schema}
+    validate-migration-naming: true
+    baseline-on-migrate: true
+    enabled: ${FLYWAY_ENABLED:true}
+
+postgres:
+  schema: ${POSTGRES_SCHEMA_NAME:dlt_manager}
 
 com:
   c4-soft:

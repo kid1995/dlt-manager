@@ -24,11 +24,11 @@ dependencies {
 	api("io.cloudevents:cloudevents-spring:${cloudeventsVersion}")
 	api("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
 	implementation 'io.micrometer:micrometer-tracing'
-	implementation 'org.apache.commons:commons-lang3:3.17.0'
+	implementation 'org.apache.commons:commons-lang3:3.20.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
-	testImplementation 'de.signaliduna.elpa:elpa4-model:1.0.8'
+	testImplementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
 }
 
 publishing {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -44,18 +45,20 @@ public class SecurityControllerAdvice {
     final SiErrorMessage siErrorMessage = new SiErrorMessage(ex.getMessage(), "Malformed request payload.");
     return new ResponseEntity<>(siErrorMessage, HttpStatus.BAD_REQUEST);
   }
-
-	@ExceptionHandler(ConstraintViolationException.class)
-	public ResponseEntity<SiErrorMessage> handleConstraintViolationException(ConstraintViolationException ex) {
-		var sb = new StringBuilder();
-		sb.append(ex.getMessage());
-		String violations = ex.getConstraintViolations().stream()
-			.map(cv -> cv == null ? "null" : cv.getPropertyPath() + ": " + cv.getMessage())
-			.collect(Collectors.joining(", "));
-		sb.append(violations);
-		var msg = sb.toString().trim();
-		log.error("ConstraintViolationException while processing request.\n{}", msg, ex);
-		var siErrorMessage = new SiErrorMessage(msg, "Constraint violation.");
-		return new ResponseEntity<>(siErrorMessage, HttpStatus.BAD_REQUEST);
-	}
+  
+  /**
+   * PII-Safety fix: only log property paths, not violation values (which may contain PII) -> cv.getMessage() should not be used.
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<SiErrorMessage> handleConstraintViolationException(ConstraintViolationException ex) {
+      String errorId = UUID.randomUUID().toString();
+      String violatedPaths = ex.getConstraintViolations().stream()
+              .map(cv -> cv == null ? "null" : cv.getPropertyPath().toString())
+              .collect(Collectors.joining(", "));
+      log.error("Constraint violation on fields: {} (errorId={})", violatedPaths, errorId, ex);
+      return new ResponseEntity<>(
+              new SiErrorMessage("Validierungsfehler bei: " + violatedPaths + ". Fehler-ID: " + errorId, "VALIDATION_ERROR"),
+              HttpStatus.BAD_REQUEST
+      );
+  }
 }

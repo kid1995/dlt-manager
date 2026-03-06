@@ -20,55 +20,61 @@ configurations {
 
 dependencies {
 
-	//elpa
-	implementation 'de.signaliduna.elpa:jwt-adapter:2.5.0'
-	implementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
+    //elpa
+    implementation 'de.signaliduna.elpa:jwt-adapter:2.5.0'
+    implementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
 
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-	// spring-starter
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-	implementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics'
-	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	// spring-cloud
-	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
-	// others
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
-	implementation 'io.github.springwolf:springwolf-kafka:2.0.0'
-	implementation "com.c4-soft.springaddons:spring-addons-starter-oidc:${springaddonsOidcVersion}"
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'org.postgresql:postgresql'
 
-	implementation("io.cloudevents:cloudevents-spring:${cloudeventsVersion}")
-	implementation("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
-	// logging
-	implementation('net.logstash.logback:logstash-logback-encoder:9.0') {
-		// Provided by Spring Boot
-		exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
-	}
+    // spring-starter
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics'
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // flyway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
-	testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
-	testImplementation "org.springframework.boot:spring-boot-starter-data-mongodb-reactive-test"
-	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-	testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
-	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
-	testImplementation "org.testcontainers:testcontainers-mongodb"
-	testImplementation "org.testcontainers:testcontainers"
-	testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.2'
-	testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.0.9'
-	testImplementation "com.c4-soft.springaddons:spring-addons-starter-oidc-test:${springaddonsOidcVersion}"
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // spring-cloud
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+
+    // others
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
+    implementation 'io.github.springwolf:springwolf-kafka:2.0.0'
+    implementation "com.c4-soft.springaddons:spring-addons-starter-oidc:${springaddonsOidcVersion}"
+    implementation("io.cloudevents:cloudevents-spring:${cloudeventsVersion}")
+    implementation("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
+    implementation('net.logstash.logback:logstash-logback-encoder:9.0') {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+    }
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+    testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-micrometer-metrics-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-opentelemetry-test'
+    testImplementation 'org.springframework.boot:spring-boot-micrometer-tracing-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.2'
+    testImplementation 'org.wiremock.integrations:wiremock-spring-boot:4.0.9'
+    testImplementation "com.c4-soft.springaddons:spring-addons-starter-oidc-test:${springaddonsOidcVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
