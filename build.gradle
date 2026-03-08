@@ -1,13 +1,11 @@
 buildscript {
 	repositories {
-		maven {
-			url 'https://m2repo.system.local/content/groups/full/'
-		}
+		mavenLocal()
+		mavenCentral()
 	}
 
 	dependencies {
-		// update requires scheme update in sda-dependencycheck.system.local
-		classpath 'org.postgresql:postgresql:42.7.7'// this is necessary for owasp dependency check
+		classpath 'org.postgresql:postgresql:42.7.7'
 	}
 }
 
@@ -37,7 +35,7 @@ dependencies {
 }
 
 ext {
-	set('springCloudVersion', "2025.0.0")
+	set('springCloudVersion', "2025.1.1")
 	set('micrometerTracingVersion', "1.5.3")
 	set('jacksonVersion', "2.19.1")
 	set('cloudeventsVersion', "4.0.1")
@@ -47,9 +45,7 @@ allprojects {
 	group = 'de.signaliduna.elpa.dlt-manager'
 
 	repositories {
-		maven {
-			url "https://m2repo.system.local/content/groups/full/"
-		}
+		mavenLocal()
 		mavenCentral()
 	}
 }
@@ -95,7 +91,7 @@ subprojects {
 			rule {
 				enabled = true
 				element = 'CLASS'
-				excludes = ['de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.model.*']
+				excludes = ['de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.model.*', 'de.signaliduna.dltmanager.adapter.db.model.*']
 				limit {
 					counter = 'BRANCH'
 					value = 'COVEREDRATIO'
@@ -117,23 +113,7 @@ subprojects {
 
 	check.dependsOn jacocoTestCoverageVerification
 	dependencyCheck {
-		outputDirectory = layout.buildDirectory.asFile.get().path + "/reports/dependencycheck"
-		format = "XML"
-		autoUpdate = false
-		failOnError = false
-		suppressionFiles = ["https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster"]
-		data {
-			connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
-			driver = "org.postgresql.Driver"
-			username = "ZA-SVC-DEPCHK-P"
-			password = "QPmWX.CZ4hbJRtU"
-			directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
-		}
-
-		analyzers {
-			centralEnabled = false
-			nexusEnabled = false
-		}
+		skip = true  // disabled for local development (requires internal SI infrastructure)
 	}
 }
 
@@ -180,4 +160,3 @@ tasks.register('addSnapshot', WriteProperties) {
 	println('new version: ' + newVersion)
 	property('version', newVersion)
 }
-

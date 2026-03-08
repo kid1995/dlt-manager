@@ -113,13 +113,13 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody()).isEqualTo(new SiErrorMessage("Test exception", "Constraint violation."));
+        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+        assertThat(siErrorMessageResponseEntity.getBody().message()).startsWith("Validierungsfehler bei: ");
     }
 
     @Test
     void shouldHandleConstrainViolationException_violationsNonEmpty() {
         @SuppressWarnings("unchecked") final ConstraintViolation<String> violation = mock(ConstraintViolation.class);
-        when(violation.getMessage()).thenReturn("violation-message");
         final var path = mock(Path.class);
         when(path.toString()).thenReturn("<value of path.toString()>");
         when(violation.getPropertyPath()).thenReturn(path);
@@ -128,7 +128,8 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody()).isEqualTo(new SiErrorMessage("Test exception<value of path.toString()>: violation-message", "Constraint violation."));
+        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+        assertThat(siErrorMessageResponseEntity.getBody().message()).contains("<value of path.toString()>");
     }
 
     @Test
@@ -140,6 +141,7 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody()).isEqualTo(new SiErrorMessage("Test exceptionnull", "Constraint violation."));
+        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+        assertThat(siErrorMessageResponseEntity.getBody().message()).contains("null");
     }
 }

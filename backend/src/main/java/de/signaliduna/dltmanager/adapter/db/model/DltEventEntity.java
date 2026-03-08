@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "dlt_event")
+@Entity
+@Table(name = "dlt_event")
 public class DltEventEntity {
     
     @Id
@@ -76,8 +77,6 @@ public class DltEventEntity {
     @Nullable public String getTraceId() { return traceId; }
     public String getPayload() { return payload; }
     public String getPayloadMediaType() { return payloadMediaType; }
-    public PayloadStatus getPayloadStatus() { return payloadStatus; }
-    @Nullable public String getPayloadValidationError() { return payloadValidationError; }
     @Nullable public String getError() { return error; }
     @Nullable public String getStackTrace() { return stackTrace; }
     public List<AdminActionHistoryItemEntity> getAdminActions() { return adminActions; }

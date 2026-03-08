@@ -1,9 +1,8 @@
 package de.signaliduna.dltmanager.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -11,25 +10,14 @@ import org.testcontainers.utility.DockerImageName;
  * Abstract base class for integration tests using Testcontainers that should share the same container instances
  * (See
  * <a href="https://testcontainers.com/guides/testcontainers-container-lifecycle/#_using_singleton_containers">
- * https://testcontainers.com
+ *   https://testcontainers.com
  * </a>).
  */
+@Testcontainers
 public abstract class AbstractSingletonContainerTest {
-		protected static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer(
-						DockerImageName.parse(ContainerImageNames.POSTGRES.getImageName()).asCompatibleSubstituteFor(PostgreSQLContainer.IMAGE)
-		);
-		private static final Logger log = LoggerFactory.getLogger(AbstractSingletonContainerTest.class);
-		
-		static {
-				POSTGRES_CONTAINER.start();
-		}
-		
-		@DynamicPropertySource
-		static void configureProperties(DynamicPropertyRegistry registry) {
-				String jdbcUrl = POSTGRES_CONTAINER.getJdbcUrl();
-				log.info("using 'spring.datasource.url' {}", jdbcUrl);
-				registry.add("spring.datasource.url", () -> jdbcUrl);
-				registry.add("spring.datasource.username", POSTGRES_CONTAINER::getUsername);
-				registry.add("spring.datasource.password", POSTGRES_CONTAINER::getPassword);
-		}
+    @ServiceConnection
+    @Container
+    protected static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer(
+        DockerImageName.parse(ContainerImageNames.POSTGRES.getImageName()).asCompatibleSubstituteFor(PostgreSQLContainer.IMAGE)
+    );
 }
