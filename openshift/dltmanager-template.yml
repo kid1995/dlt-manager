@@ -146,6 +146,8 @@ objects:
               envFrom:
                 - configMapRef:
                     name: ${STAGE_PROPERTY_MAP}
+                - secretRef:
+                    name: ${SECRET_FILE_NAME}
               env:
                 - name: JDK_JAVA_OPTIONS
                   value: '-XX:+UseSerialGC -XX:MaxRAMPercentage=50 -XX:InitialRAMPercentage=25 -XX:+UseStringDeduplication'
@@ -156,31 +158,6 @@ objects:
                     secretKeyRef:
                       key: password
                       name: elpa-dltmanager-${TARGET_SEGMENT}
-                - name: AUTH_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: AUTH_PASSWORD
-                      name: ${SECRET_FILE_NAME}
-                - name: MONGODB_OPTIONS
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${BRANCH_NAME}-mongodb
-                      key: MONGODB_OPTIONS
-                - name: MONGODB_HOSTS
-                  valueFrom:
-                    configMapKeyRef:
-                      name: ${BRANCH_NAME}-mongodb
-                      key: MONGODB_HOSTS
-                - name: MONGODB_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${BRANCH_NAME}-mongodb
-                      key: MONGODB_USER
-                - name: MONGODB_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${BRANCH_NAME}-mongodb
-                      key: MONGODB_PASSWORD
               readinessProbe:
                 httpGet:
                   path: /health/readiness

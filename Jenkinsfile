@@ -302,7 +302,7 @@ void deployApplications(TargetSegment targetSegment) {
         backendDeploymentParams += ['SECRET_FILE_NAME' : SERVICE_GROUP + "-secrets", 'AUTH_PASSWORD' : AUTH_PASSWORD]
         backendDeploymentParams += ['BASE_ROUTE_URL' : shortenedBackendURL]
 
-        echo "# POSTGRES_USER. - POSTGRES_USER: $env.POSTGRES_USER"
+
 
         if (targetSegment == TargetSegment.tst) {
             elpa_psql.dropObsoleteSchemas(
@@ -315,6 +315,17 @@ void deployApplications(TargetSegment targetSegment) {
                 POSTGRES_SCHEMA_PREFIX
             )
         }
+
+        echo "--- Backend Deployment Parameters ---"
+        backendDeploymentParams.each { key, value ->
+            // Note: Masking password fields is a good practice for security
+            if (key.contains('PASSWORD')) {
+                echo "  ${key}: ********"
+            } else {
+                echo "  ${key}: ${value}"
+            }
+        }
+        echo "------------------------------------"
 
         def frontendServiceUrls = ['BACKEND_URL': "https://$shortenedBackendURL", 'BASE_ROUTE_URL': shortenedFrontendURL]
         def frontendDeploymentParams = FRONTEND_DEPLOYMENT_PARAMS[targetSegment] + frontendServiceUrls
