@@ -27,6 +27,17 @@ public final class SafeExceptionLogger {
     public static String safeClassName(Throwable e) {
         return e.getClass().getSimpleName();
     }
+
+    /**
+     * Strips newlines and control characters from user-supplied values
+     * to prevent log injection (javasecurity:S5145).
+     */
+    public static String sanitizeLogArg(@Nullable String value) {
+        if (value == null) {
+            return "null";
+        }
+        return value.replaceAll("[\r\n\t\\p{Cntrl}]", "_");
+    }
     
     // remove query params to make sure
     private static @NonNull String sanitizeUrl(@Nullable Request request) {

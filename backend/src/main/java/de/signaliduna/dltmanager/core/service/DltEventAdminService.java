@@ -75,7 +75,9 @@ public class DltEventAdminService {
             dltEventPersistenceAdapter.addAdminAction(dltEventId,
                     adminActionItemBuilder.status(DltEventAction.Status.TRIGGERED.name()).build()
             );
-            log.info("resent application for dltEventId {} (rohdatenUuidId: {})", dltEventId, rohdatenUuidId);
+            final String safeDltEventId = SafeExceptionLogger.sanitizeLogArg(dltEventId);
+            final String safeRohdatenUuidId = SafeExceptionLogger.sanitizeLogArg(rohdatenUuidId);
+            log.info("resent application for dltEventId {} (rohdatenUuidId: {})", safeDltEventId, safeRohdatenUuidId);
         } catch (FeignException e) {
             // Security: SafeExceptionLogger strips request/response body that may contain PII
             String safeMsg = SafeExceptionLogger.sanitizeFeignException(e);
