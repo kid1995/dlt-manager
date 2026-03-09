@@ -1,7 +1,7 @@
 package de.signaliduna.dltmanager.test;
 
 public enum ContainerImageNames {
-    POSTGRES("postgres:16-alpine");
+    POSTGRES("hub.docker.system.local/postgres:16-alpine");
 
     private final String imageName;
 

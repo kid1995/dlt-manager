@@ -113,7 +113,8 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+		    assert siErrorMessageResponseEntity.getBody() != null;
+		    assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
         assertThat(siErrorMessageResponseEntity.getBody().message()).startsWith("Validierungsfehler bei: ");
     }
 
@@ -128,7 +129,8 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+		    assert siErrorMessageResponseEntity.getBody() != null;
+		    assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
         assertThat(siErrorMessageResponseEntity.getBody().message()).contains("<value of path.toString()>");
     }
 
@@ -141,7 +143,8 @@ class SecurityControllerAdviceTest {
         ResponseEntity<SiErrorMessage> siErrorMessageResponseEntity = classUnderTest.handleConstraintViolationException(ex);
 
         assertThat(siErrorMessageResponseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
+		    assert siErrorMessageResponseEntity.getBody() != null;
+		    assertThat(siErrorMessageResponseEntity.getBody().reason()).isEqualTo("VALIDATION_ERROR");
         assertThat(siErrorMessageResponseEntity.getBody().message()).contains("null");
     }
 }

@@ -27,7 +27,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
@@ -58,6 +57,7 @@ class DltManagerControllerTest {
 	@Autowired
 	MockMvc mockMvc;
 	@Autowired
+	@SuppressWarnings("unused")
 	JsonMapper jsonMapper;
 
 	@MockitoBean
@@ -372,12 +372,5 @@ class DltManagerControllerTest {
 		var url = "http://example.com/test/mock";
 		return feign.Request.create(Request.HttpMethod.POST, url, Map.of(), feign.Request.Body.create(new byte[]{}), null);
 	}
-
-	String asJsonString(Object object) {
-		try {
-			return jsonMapper.writeValueAsString(object);
-		} catch (JacksonException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	
 }

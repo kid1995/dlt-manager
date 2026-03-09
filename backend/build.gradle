@@ -21,8 +21,8 @@ configurations {
 dependencies {
 
     //elpa
-    implementation 'de.signaliduna.elpa:jwt-adapter:2.5.1-SNAPSHOT'
-    implementation 'de.signaliduna.elpa:elpa4-model:1.1.1-SNAPSHOT'
+    implementation 'de.signaliduna.elpa:jwt-adapter:2.5.0'
+    implementation 'de.signaliduna.elpa:elpa4-model:1.1.0'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
