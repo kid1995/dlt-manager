@@ -79,6 +79,21 @@ parameters:
     name: SECRET_FILE_NAME
     required: true
 
+  - description: PostgreSQL user name
+    displayName: PostgreSQL user name
+    name: POSTGRES_USER
+    required: true
+
+  - description: PostgreSQL user password
+    displayName: PostgreSQL user password
+    name: POSTGRES_PASSWORD
+    required: true
+
+  - description: PostgreSQL Schema depends on branch name
+    displayName: PostgreSQL Schema
+    name: POSTGRES_SCHEMA_NAME
+    required: true
+
 objects:
   - apiVersion: v1
     kind: DeploymentConfig
@@ -134,6 +149,8 @@ objects:
               env:
                 - name: JDK_JAVA_OPTIONS
                   value: '-XX:+UseSerialGC -XX:MaxRAMPercentage=50 -XX:InitialRAMPercentage=25 -XX:+UseStringDeduplication'
+                - name: POSTGRES_SCHEMA_NAME
+                  value: "${POSTGRES_SCHEMA_NAME}"
                 - name: KAFKA_PASSWORD
                   valueFrom:
                     secretKeyRef:
@@ -246,3 +263,5 @@ objects:
       name: ${SECRET_FILE_NAME}
     stringData:
       AUTH_PASSWORD: "${AUTH_PASSWORD}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"

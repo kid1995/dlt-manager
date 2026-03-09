@@ -27,13 +27,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static de.signaliduna.dltmanager.test.TestUtil.assertThatJsonString;
 import static de.signaliduna.dltmanager.test.TestUtil.captureSingleArg;
@@ -58,6 +57,7 @@ class DltManagerControllerTest {
 	@Autowired
 	MockMvc mockMvc;
 	@Autowired
+	@SuppressWarnings("unused")
 	JsonMapper jsonMapper;
 
 	@MockitoBean
@@ -135,7 +135,7 @@ class DltManagerControllerTest {
 		@Test
 		@WithMockAuthentication(name = AUTH_USER)
 		void withOneDltEvent() throws Exception {
-			when(dltEventPersistenceAdapter.streamAll()).thenReturn(Stream.of(SharedTestData.DLT_EVENT_1));
+			when(dltEventPersistenceAdapter.findAll()).thenReturn(List.of(SharedTestData.DLT_EVENT_1));
 			final MvcResult mvcResult = mockMvc.perform(get("/api/events/overview")
 					.contentType("application/json"))
 				.andExpect(status().isOk())
@@ -291,7 +291,7 @@ class DltManagerControllerTest {
 			// then
 			verify(papierantragEingangAdapter).resendPapierantrag("myRohdatenUuid");
 			final var capturedAdminActionHistoryItem = captureSingleArg(AdminActionHistoryItem.class, c ->
-				verify(dltEventPersistenceAdapter).updateLastAdminActionForDltEvent(eq(DLT_EVENT1_ID), c.capture())).getValue();
+				verify(dltEventPersistenceAdapter).addAdminAction(eq(DLT_EVENT1_ID), c.capture())).getValue();
 			assertThat(capturedAdminActionHistoryItem).usingRecursiveComparison().ignoringFieldsOfTypes(LocalDateTime.class).isEqualTo(
 				AdminActionHistoryItem.builder()
 					.actionName(AdminAction.RESEND_TO_PAPIERANTRAG_EINGANG.name())
@@ -319,13 +319,13 @@ class DltManagerControllerTest {
 			// then
 			verify(papierantragEingangAdapter).resendPapierantrag("myRohdatenUuid");
 			final var capturedAdminActionHistoryItem = captureSingleArg(AdminActionHistoryItem.class, c ->
-				verify(dltEventPersistenceAdapter).updateLastAdminActionForDltEvent(eq(DLT_EVENT1_ID), c.capture())).getValue();
+				verify(dltEventPersistenceAdapter).addAdminAction(eq(DLT_EVENT1_ID), c.capture())).getValue();
 			assertThat(capturedAdminActionHistoryItem).usingRecursiveComparison().ignoringFieldsOfTypes(LocalDateTime.class).isEqualTo(
 				AdminActionHistoryItem.builder()
 					.actionName(AdminAction.RESEND_TO_PAPIERANTRAG_EINGANG.name())
 					.userName(AUTH_USER)
 					.status(DltEventAction.Status.FAILED.name())
-					.statusError("Mock exception")
+					.statusError("FeignException{status=503, method=POST, url=http://example.com/test/mock}")
 					.timestamp(SharedTestData.DLT_EVENT_1.addToDltTimestamp())
 					.build()
 			);
@@ -372,12 +372,5 @@ class DltManagerControllerTest {
 		var url = "http://example.com/test/mock";
 		return feign.Request.create(Request.HttpMethod.POST, url, Map.of(), feign.Request.Body.create(new byte[]{}), null);
 	}
-
-	String asJsonString(Object object) {
-		try {
-			return jsonMapper.writeValueAsString(object);
-		} catch (JacksonException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	
 }

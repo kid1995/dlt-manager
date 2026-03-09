@@ -1,8 +1,9 @@
 #!groovy
-@Library('si-dp-shared-libs')
+@Library(['si-dp-shared-libs', 'elpa-shared-lib']) _
 import de.signaliduna.TargetSegment
 
 SERVICE_GROUP = "elpa"
+SERVICE_NAME = "dltmanager"
 PROJECT_ROOT_FOLDER = "./"
 SERVICE_BACKEND_NAME = "dltmanager"
 APP_BACKEND_NAME = "dltmanager"
@@ -11,6 +12,9 @@ JAVA_VERSION = "21"
 
 APP_FRONTEND_NAME = "dltmanager-ui"
 APP_FRONTEND_FOLDER = "frontend"
+
+POSTGRES_SCHEMA_PREFIX = 'dma_'
+POSTGRES_DEFAULT_SCHEMA_NAME = 'dlt_manager'
 
 DB_VERSION = "6.0"
 DB_BACKUP_COUNT = 3
@@ -71,7 +75,7 @@ node {
     properties([
         pipelineTriggers(createNightlyBuildTriggers()),
 				parameters([
-					booleanParam(name: 'Release', defaultValue: false, description: 'Release the libs 🚀')
+					booleanParam(name: 'Release', defaultValue: false, description: 'Release the libs 🚀 (Not possible on master)')
 				])
     ])
 
@@ -81,7 +85,7 @@ node {
         si_git.checkoutBranch(env.BRANCH_NAME, createNotifyConfig())
         si_java.version("21")
          // NOTE: Keep in sync with .nvmrc
-				si_npm.node_version('22.14.0')
+		si_npm.node_version('22.14.0')
 
         def projectVersion = readProjectVersion()
         echo "Deploying Version: $projectVersion"
@@ -125,8 +129,10 @@ node {
         }
 
 				if (!params.Release) {
-					stage("Publish Libraries") {
-						publish(PROJECT_ROOT_FOLDER, JAVA_VERSION)
+					if (!si_git.isMaster()) {
+						stage("Publish Libraries") {
+							publish(PROJECT_ROOT_FOLDER, JAVA_VERSION)
+						}
 					}
 				} else if (si_git.isDevelop()) {
 					// Removes the "-SNAPSHOT" suffix from the `version` property in `gradle.properties` (if so), commits & pushes the change.
@@ -143,12 +149,13 @@ node {
 				}
 
         if (si_git.isMaster()) {
-						deployPROD()
+			deployPROD()
         } else {
             buildDeploy(TargetSegment.tst)
             if (si_git.isDevelop()) {
                 buildDeploy(TargetSegment.abn)
             }
+            deleteDeployedRenovateBranch()
         }
     }
 }
@@ -270,23 +277,51 @@ private void buildContainers(TargetSegment targetSegment) {
 
 void deployApplications(TargetSegment targetSegment) {
     echo "deploying application $APP_BACKEND_NAME to $targetSegment"
-		si_mongodb.deployDB(SERVICE_GROUP, SERVICE_BACKEND_NAME, targetSegment, DB_VERSION, DB_BACKUP_COUNT, DB_BACKUP_SCHEDULE, DB_SIZE)
+
+    def shortenedBackendURL = shortenUrl(targetSegment, SERVICE_BACKEND_NAME)
+    def shortenedFrontendURL = shortenUrl(targetSegment, APP_FRONTEND_NAME);
+
+    def postgresCurrentSchema = TargetSegment.tst.equals(targetSegment)
+			? si_psql.normalizeSchemaName("${POSTGRES_SCHEMA_PREFIX}${si_git.branchName()}")
+			: POSTGRES_DEFAULT_SCHEMA_NAME
+
+    def backendDeploymentParams = [
+    		'POSTGRES_SCHEMA_NAME' : postgresCurrentSchema
+    	]
+
+// Laden der Credentials. Die "credentialsId" muss angepasst werden, so dass es aus dem richtigen Secret ausgelesen werden kann. In diesem Beispiel machen wir das für den generellen technischen User und für den Postgres-User.
     withCredentials([
-            usernamePassword(credentialsId: "elpa-technical-user-password-$targetSegment", passwordVariable: 'AUTH_PASSWORD', usernameVariable: 'USERNAME')
-    ]) {
-    		def shortenedBackendURL = shortenUrl(targetSegment, SERVICE_BACKEND_NAME)
+		usernamePassword(credentialsId: "elpa-technical-user-password-$targetSegment", passwordVariable: 'AUTH_PASSWORD', usernameVariable: 'USERNAME'),
+		usernamePassword(credentialsId: "elpa4-postgres-$targetSegment", passwordVariable: 'POSTGRES_PASSWORD', usernameVariable: 'POSTGRES_USER') // Laden der Postgres Credentials
+	]) {
+        backendDeploymentParams += [
+                'POSTGRES_USER' : POSTGRES_USER,
+                'POSTGRES_PASSWORD' : POSTGRES_PASSWORD
+            ]
+        backendDeploymentParams += BACKEND_DEPLOYMENT_PARAMS[targetSegment]
+        backendDeploymentParams += ['SECRET_FILE_NAME' : SERVICE_GROUP + "-secrets", 'AUTH_PASSWORD' : AUTH_PASSWORD]
+        backendDeploymentParams += ['BASE_ROUTE_URL' : shortenedBackendURL]
 
-    		def shortenedFrontendURL = shortenUrl(targetSegment, APP_FRONTEND_NAME);
-			  def frontendServiceUrls = ['BACKEND_URL': "https://$shortenedBackendURL", 'BASE_ROUTE_URL': shortenedFrontendURL]
-				def frontendDeploymentParams = FRONTEND_DEPLOYMENT_PARAMS[targetSegment] + frontendServiceUrls
+        echo "# POSTGRES_USER. - POSTGRES_USER: $env.POSTGRES_USER"
 
-        si_openshift.deployApplication(SERVICE_GROUP, SERVICE_BACKEND_NAME, APP_BACKEND_NAME, targetSegment,
-        	BACKEND_DEPLOYMENT_PARAMS[targetSegment]+[SECRET_FILE_NAME: SERVICE_GROUP + "-secrets", 'AUTH_PASSWORD' : AUTH_PASSWORD, 'BASE_ROUTE_URL': shortenedBackendURL])
+        if (targetSegment == TargetSegment.tst) {
+            elpa_psql.dropObsoleteSchemas(
+                SERVICE_GROUP,
+                POSTGRES_USER,
+                POSTGRES_PASSWORD,
+                'vipsiae11t.system-a.local',
+                5432,
+                'elpapgt',
+                POSTGRES_SCHEMA_PREFIX
+            )
+        }
 
-				si_openshift.deployApplication(SERVICE_GROUP, SERVICE_BACKEND_NAME, APP_FRONTEND_NAME, targetSegment, frontendDeploymentParams)
+        def frontendServiceUrls = ['BACKEND_URL': "https://$shortenedBackendURL", 'BASE_ROUTE_URL': shortenedFrontendURL]
+        def frontendDeploymentParams = FRONTEND_DEPLOYMENT_PARAMS[targetSegment] + frontendServiceUrls
+
+        si_openshift.deployApplication(SERVICE_GROUP, SERVICE_BACKEND_NAME, APP_BACKEND_NAME, targetSegment, backendDeploymentParams)
+        si_openshift.deployApplication(SERVICE_GROUP, SERVICE_BACKEND_NAME, APP_FRONTEND_NAME, targetSegment, frontendDeploymentParams)
     }
-
-    echo "finished deploying application $APP_BACKEND_NAME to $targetSegment"
 }
 
 private String shortenUrl(TargetSegment targetSegment, String appName) {
@@ -301,4 +336,15 @@ private String shortenUrl(TargetSegment targetSegment, String appName) {
         branchName = branchName.substring(0, Math.min(branchName.length(), 15))
     }
     return "${branchName}-${appName}-${projectUrl}"
+}
+
+private void deleteDeployedRenovateBranch() {
+    echo "# env.BRANCH_NAME - Full Branch Name: $env.BRANCH_NAME"
+    BRANCH_NAME = si_openshift.filterBranchName(env.BRANCH_NAME)
+    echo "# filtered BRANCH_NAME: $BRANCH_NAME"
+    if(env.BRANCH_NAME.startsWith("renovate")) {
+        echo "Renovate Branch $BRANCH_NAME shall be deleted"
+        si_openshift.login(SERVICE_GROUP, SERVICE_NAME, TargetSegment.tst)
+        sh "oc delete configmaps,cronjobs,deployments,deploymentconfigs,horizontalpodautoscalers,jobs,persistentvolumeclaims,routes,services,statefulsets --selector 'branch=$BRANCH_NAME' --config cli-context"
+    }
 }

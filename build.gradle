@@ -5,18 +5,18 @@ buildscript {
 
 	dependencies {
 		// update requires scheme update in sda-dependencycheck.system.local
-		classpath 'org.postgresql:postgresql:42.7.7'// this is necessary for owasp dependency check
+		classpath 'org.postgresql:postgresql:42.7.10'// this is necessary for owasp dependency check
 	}
 }
 
 plugins {
 	id 'idea'
 	id 'jacoco'
-	id 'org.sonarqube' version '6.2.0.5505'
-	id 'org.owasp.dependencycheck' version '12.1.3'
-	id 'org.springframework.boot' version '4.0.2'
+	id 'org.sonarqube' version '7.2.3.7755'
+	id 'org.owasp.dependencycheck' version '12.1.6'
+	id 'org.springframework.boot' version '4.0.3'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.openrewrite.rewrite' version '7.23.0'
+	id("org.openrewrite.rewrite") version("latest.release")
 }
 
 
@@ -27,17 +27,8 @@ rewrite {
 }
 
 
-dependencies {
-	rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:3.23.0"))
-	rewrite("org.openrewrite.recipe:rewrite-spring")
-	rewrite("org.openrewrite.recipe:rewrite-jackson")
-	rewrite("org.openrewrite.recipe:rewrite-testing-frameworks")
-}
-
 ext {
-	set('springCloudVersion', "2025.0.0")
-	set('micrometerTracingVersion', "1.5.3")
-	set('jacksonVersion', "2.19.1")
+	set('springCloudVersion', "2025.1.1")
 	set('cloudeventsVersion', "4.0.1")
 }
 
@@ -51,6 +42,12 @@ allprojects {
 }
 
 LinkedHashSet jacocoSet = new LinkedHashSet()
+
+dependencies {
+	rewrite("org.openrewrite.recipe:rewrite-spring:6.26.0")
+	rewrite("org.openrewrite.recipe:rewrite-jackson:1.18.0")
+	rewrite("org.openrewrite.recipe:rewrite-testing-frameworks:3.29.0")
+}
 
 subprojects {
 	apply plugin: 'java'
@@ -66,12 +63,13 @@ subprojects {
 		sourceCompatibility = JavaVersion.VERSION_21
 	}
 
+
 	test {
 		useJUnitPlatform()
 	}
 
 	jacoco {
-		toolVersion = "0.8.13"
+		toolVersion = "0.8.14"
 		reportsDirectory = layout.buildDirectory.dir("jacoco")
 	}
 
@@ -91,7 +89,7 @@ subprojects {
 			rule {
 				enabled = true
 				element = 'CLASS'
-				excludes = ['de.signaliduna.elpa.dltmanager.adapter.message.errorhandler.model.*']
+				excludes = ['de.signaliduna.dltmanager.**.model.*']
 				limit {
 					counter = 'BRANCH'
 					value = 'COVEREDRATIO'
@@ -117,19 +115,17 @@ subprojects {
 		format = "XML"
 		autoUpdate = false
 		failOnError = false
-		suppressionFiles = ["https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster"]
-		data {
-			connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
-			driver = "org.postgresql.Driver"
-			username = "ZA-SVC-DEPCHK-P"
-			password = "QPmWX.CZ4hbJRtU"
-			directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
-		}
-
-		analyzers {
-			centralEnabled = false
-			nexusEnabled = false
-		}
+		suppressionFiles = [
+			rootProject.projectDir.toString() + '/dev-setup/suppressed-cves.xml',
+			"https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster"
+		]
+		data.connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
+		data.driver = "org.postgresql.Driver"
+		data.username = "ZA-SVC-DEPCHK-P"
+		data.password = "QPmWX.CZ4hbJRtU"
+		data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
+		analyzers.centralEnabled = false
+		analyzers.nexusEnabled = false
 	}
 }
 

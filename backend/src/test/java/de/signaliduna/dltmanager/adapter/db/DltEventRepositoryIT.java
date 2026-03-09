@@ -3,144 +3,186 @@ package de.signaliduna.dltmanager.adapter.db;
 import de.signaliduna.dltmanager.adapter.db.model.AdminActionHistoryItemEntity;
 import de.signaliduna.dltmanager.adapter.db.model.DltEventEntity;
 import de.signaliduna.dltmanager.test.ContainerImageNames;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Query;
-
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mongodb.MongoDBContainer;
-import org.testcontainers.shaded.com.google.common.net.MediaType;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
-@DataMongoTest(
-	properties = {
-		"jwt.enabled=false"
-	}
-)
-class DltEventRepositoryIT{
+@DataJpaTest(properties = {"jwt.enabled=false"})
+class DltEventRepositoryIT {
+    
+    @Container
+    @ServiceConnection
+    static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer(
+            DockerImageName.parse(ContainerImageNames.POSTGRES.getImageName())
+                    .asCompatibleSubstituteFor(PostgreSQLContainer.IMAGE)
+    );
+    
+    private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 1, 1, 0, 0);
+    
+    @Autowired
+    DltEventRepository dltEventRepository;
+    
+    private DltEventEntity createEvent(String dltEventId) {
+        return DltEventEntity.builder()
+                .dltEventId(dltEventId)
+                .originalEventId("originalEventId")
+                .serviceName("partnersync")
+                .addToDltTimestamp(TIMESTAMP)
+                .topic("topic")
+                .partition("partition")
+                .traceId("traceId")
+                .payload("payload")
+                .payloadMediaType("application/json")
+                .error("errorMsg")
+                .stackTrace("stacktrace")
+                .build();
+    }
+    
+    @Nested
+    class save {
+        
+        @Test
+        void shouldSaveNewDltEvents() {
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).isEmpty();
+            dltEventRepository.save(createEvent(UUID.randomUUID().toString()));
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
+        }
+        
+        @Test
+        void shouldNotInsertTheSameEntityTwice() {
+            String id = UUID.randomUUID().toString();
+            dltEventRepository.save(createEvent(id));
+            dltEventRepository.save(createEvent(id));
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
+        }
+        
+        @Test
+        void shouldUpdateExistingEntitiesWithTheSameDltEventId() {
+            String id = UUID.randomUUID().toString();
+            dltEventRepository.save(createEvent(id));
+            DltEventEntity found = dltEventRepository.findById(id).orElseThrow();
+            found.setError("updated error");
+            dltEventRepository.save(found);
+            assertThat(dltEventRepository.findById(id))
+                    .isPresent()
+                    .get()
+                    .extracting(DltEventEntity::getError)
+                    .isEqualTo("updated error");
+        }
+    }
+    
+    @Nested
+    class addAdminAction {
+        
+        @Test
+        void shouldAddAdminAction() {
+            String id = UUID.randomUUID().toString();
+            DltEventEntity event = dltEventRepository.save(createEvent(id));
+            event.addAdminAction(AdminActionHistoryItemEntity.builder()
+                    .userName("user1").actionName("RETRY").actionDetails("details")
+                    .timestamp(TIMESTAMP).status("SUCCESS").build());
+            dltEventRepository.save(event);
 
-	@Container
-	@ServiceConnection
-	static final MongoDBContainer mongoDBContainer = new MongoDBContainer(ContainerImageNames.MONGO.getImageName());
+            DltEventEntity found = dltEventRepository.findById(id).orElseThrow();
+            assertThat(found.getAdminActions()).hasSize(1);
+            assertThat(found.getLastAdminAction()).isNotNull();
+            assertThat(found.getLastAdminAction().getActionName()).isEqualTo("RETRY");
+        }
+        
+        @Test
+        void shouldReturnNullLastAdminActionWhenNoActions() {
+            String id = UUID.randomUUID().toString();
+            dltEventRepository.save(createEvent(id));
+            DltEventEntity found = dltEventRepository.findById(id).orElseThrow();
+            assertThat(found.getLastAdminAction()).isNull();
+        }
+    }
+    
+    @Nested
+    class deleteByDltEventId {
+        
+        @Test
+        void withNonExistingDltEventId() {
+            assertThat(dltEventRepository.deleteByDltEventId("non-existing")).isZero();
+        }
+        
+        @Test
+        void withExistingDltEventId() {
+            String id = UUID.randomUUID().toString();
+            dltEventRepository.save(createEvent(id));
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
+            assertThat(dltEventRepository.deleteByDltEventId(id)).isEqualTo(1L);
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).isEmpty();
+        }
+        
+        @Test
+        void shouldCascadeDeleteAdminActions() {
+            String id = UUID.randomUUID().toString();
+            DltEventEntity event = dltEventRepository.save(createEvent(id));
+            event.addAdminAction(AdminActionHistoryItemEntity.builder()
+                    .userName("user1").actionName("RETRY").timestamp(TIMESTAMP).status("SUCCESS").build());
+            dltEventRepository.save(event);
+            
+            assertThat(dltEventRepository.deleteByDltEventId(id)).isEqualTo(1L);
+            assertThat(dltEventRepository.findById(id)).isEmpty();
+        }
+    }
+    
+    @Nested
+    class findAllOrderedByLastAdminActionDesc {
+        
+        @Test
+        void shouldReturnEmptyWhenNoEvents() {
+            assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).isEmpty();
+        }
+        
+        @Test
+        void shouldOrderByLastAdminActionTimestampDesc() {
+            String id1 = UUID.randomUUID().toString();
+            DltEventEntity event1 = dltEventRepository.save(createEvent(id1));
+            event1.addAdminAction(AdminActionHistoryItemEntity.builder()
+                    .userName("u").actionName("A").timestamp(TIMESTAMP.plusMinutes(10)).status("OK").build());
+            dltEventRepository.save(event1);
+            
+            String id2 = UUID.randomUUID().toString();
+            DltEventEntity event2 = dltEventRepository.save(createEvent(id2));
+            event2.addAdminAction(AdminActionHistoryItemEntity.builder()
+                    .userName("u").actionName("A").timestamp(TIMESTAMP.plusMinutes(5)).status("OK").build());
+            dltEventRepository.save(event2);
+            
+            String id3 = UUID.randomUUID().toString();
+            dltEventRepository.save(createEvent(id3));
+            
 
-	private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 1, 1, 0, 0);
+            
+            var result = dltEventRepository.findAllOrderedByLastAdminActionDesc();
+            assertThat(result).hasSize(3);
+            assertThat(result.get(0).getDltEventId()).isEqualTo(id1);
+            assertThat(result.get(1).getDltEventId()).isEqualTo(id2);
+            assertThat(result.get(2).getDltEventId()).isEqualTo(id3);
+        }
+        
+        @Test
+        void shouldEagerlyLoadAdminActions() {
+            String id = UUID.randomUUID().toString();
+            DltEventEntity event = dltEventRepository.save(createEvent(id));
+            event.addAdminAction(AdminActionHistoryItemEntity.builder()
+                    .userName("user").actionName("RETRY").timestamp(TIMESTAMP).status("OK").build());
+            dltEventRepository.save(event);
 
-	private static final DltEventEntity DEFAULT_DLT_EVENT = DltEventEntity.builder()
-		.dltEventId(UUID.randomUUID().toString())
-		.originalEventId("originalEventId")
-		.serviceName("partnersync")
-		.addToDltTimestamp(TIMESTAMP)
-		.topic("topic")
-		.partition("partition")
-		.traceId("traceId")
-		.payload("payload")
-		.payloadMediaType(MediaType.ANY_APPLICATION_TYPE.type())
-		.error("errorMsg")
-		.stackTrace("stacktrace")
-		.build();
-
-	@Autowired
-	DltEventRepository dltEventRepository;
-	@Autowired
-	MongoOperations mongoOperations;
-
-	@AfterEach
-	void afterEach() {
-		mongoOperations.remove(new Query(), DltEventEntity.class);
-	}
-
-	@Nested
-	class save {
-
-		@Test
-		void shouldSaveNewDltEvents() {
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-			dltEventRepository.save(DEFAULT_DLT_EVENT);
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).containsExactly(DEFAULT_DLT_EVENT);
-		}
-
-		@Test
-		void shouldNotInsertTheSameEntityTwice() {
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-			dltEventRepository.save(DEFAULT_DLT_EVENT);
-			dltEventRepository.save(DEFAULT_DLT_EVENT);
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).containsExactly(DEFAULT_DLT_EVENT);
-		}
-
-		@Test
-		void shouldUpdateExistingEntitiesWithTheSameDltEventId() {
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-			dltEventRepository.save(DEFAULT_DLT_EVENT);
-			final var dltEventMod = DEFAULT_DLT_EVENT.toBuilder().error("updated error").build();
-			dltEventRepository.save(dltEventMod);
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).containsExactly(dltEventMod);
-		}
-	}
-
-	@Nested
-	class updateLastAdminActionForDltEvent {
-		final AdminActionHistoryItemEntity lastAdminAction = AdminActionHistoryItemEntity.builder()
-			.userName("user1")
-			.actionName("retry via Kafka")
-			.actionDetails("action-details")
-			.timestamp(TIMESTAMP)
-			.status("ok")
-			.build();
-
-		@Test
-		void shouldSaveNewLastAdminActionAndUpdateExistingOne() {
-			final DltEventEntity entity = dltEventRepository.save(DEFAULT_DLT_EVENT);
-
-			// save initial lastAdminAction value
-			dltEventRepository.updateLastAdminActionForDltEvent(entity.dltEventId(), lastAdminAction);
-			assertThat(dltEventRepository.findById(entity.dltEventId()).map(DltEventEntity::lastAdminAction)).contains(lastAdminAction);
-
-			// update existing lastAdminAction value
-			final var updatedAdminAction = lastAdminAction.toBuilder().timestamp(TIMESTAMP.plusMinutes(1)).statusError("action failed").build();
-			dltEventRepository.updateLastAdminActionForDltEvent(entity.dltEventId(), updatedAdminAction);
-			assertThat(dltEventRepository.findById(entity.dltEventId()).map(DltEventEntity::lastAdminAction)).contains(updatedAdminAction);
-		}
-
-		@Test
-		void shouldReturnFalseWhenNotUpdated() {
-			//given
-			assertThat(dltEventRepository.findById(DEFAULT_DLT_EVENT.dltEventId())).isEmpty();
-
-			//when/then
-			assertThat(dltEventRepository.updateLastAdminActionForDltEvent(DEFAULT_DLT_EVENT.dltEventId(), lastAdminAction)).isFalse();
-		}
-	}
-
-	@Nested
-	class deleteByDltEventId {
-		@Test
-		void withNonExistingDltEventId() {
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-
-			assertThat(dltEventRepository.deleteByDltEventId(DEFAULT_DLT_EVENT.dltEventId())).isZero();
-		}
-
-		@Test
-		void withExistingDltEventId() {
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-			dltEventRepository.save(DEFAULT_DLT_EVENT);
-
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).hasSize(1);
-
-			assertThat(dltEventRepository.deleteByDltEventId(DEFAULT_DLT_EVENT.dltEventId())).isEqualTo( 1L);
-			assertThat(dltEventRepository.findAllByOrderByLastAdminActionDesc()).isEmpty();
-		}
-	}
-
+            var result = dltEventRepository.findAllOrderedByLastAdminActionDesc();
+            assertThat(result).hasSize(1);
+            assertThat(result.getFirst().getAdminActions()).hasSize(1);
+        }
+    }
 }

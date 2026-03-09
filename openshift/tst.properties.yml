@@ -34,3 +34,7 @@ objects:
       SERVICE_SYSTEM: "TEST"
       LOGBACK_FILE: "logback-json.xml"
       PAPIERANTRAG_EINGANG_SERVICE_URL: "https://tst-papierantrageingang-elpa-pape-tst.osot.system.local/api"
+      POSTGRES_HOST: "vipsiae11t.system-a.local"
+      POSTGRES_DB_NAME: "elpapgt"
+      FLYWAY_ENABLED: "true"
+      FLYWAY_LOCATIONS: "db/migration"

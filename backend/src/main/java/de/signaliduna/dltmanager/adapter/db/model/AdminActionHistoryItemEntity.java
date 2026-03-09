@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "admin_action_history")
+@Entity
+@Table(name = "admin_action_history")
 public class AdminActionHistoryItemEntity {
     
     @Id

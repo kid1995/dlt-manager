@@ -11,51 +11,62 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityMapperTest {
 
-	@Nested
-	class fromAdminActionHistoryItemEntity {
-		@Test
-		void entityNull() {
-			assertThat(EntityMapper.fromAdminActionHistoryItemEntity(null)).isNull();
-		}
+    @Nested
+    class fromAdminActionHistoryItemEntity {
+        @Test
+        void entityNull() {
+            assertThat(EntityMapper.fromAdminActionHistoryItemEntity(null)).isNull();
+        }
 
-		@Test
-		void entityNotNull() {
-			final var entity = new AdminActionHistoryItemEntity("userName", LocalDateTime.now(), "actionName",
-				"actionDetails", "status", "statusError");
-			assertThat(EntityMapper.fromAdminActionHistoryItemEntity(entity)).isEqualTo(
-				AdminActionHistoryItem.builder()
-					.userName(entity.userName())
-					.timestamp(entity.timestamp())
-					.actionName(entity.actionName())
-					.actionDetails(entity.actionDetails())
-					.status(entity.status())
-					.statusError(entity.statusError())
-					.build()
-			);
-		}
-	}
+        @Test
+        void entityNotNull() {
+            final LocalDateTime now = LocalDateTime.now();
+            final var entity = AdminActionHistoryItemEntity.builder()
+                .userName("userName")
+                .timestamp(now)
+                .actionName("actionName")
+                .actionDetails("actionDetails")
+                .status("status")
+                .statusError("statusError")
+                .build();
+            assertThat(EntityMapper.fromAdminActionHistoryItemEntity(entity)).isEqualTo(
+                AdminActionHistoryItem.builder()
+                    .userName(entity.getUserName())
+                    .timestamp(entity.getTimestamp())
+                    .actionName(entity.getActionName())
+                    .actionDetails(entity.getActionDetails())
+                    .status(entity.getStatus())
+                    .statusError(entity.getStatusError())
+                    .build()
+            );
+        }
+    }
 
-	@Nested
-	class toAdminHistoryItemEntity {
-		@Test
-		void entityNull() {
-			assertThat(EntityMapper.toAdminHistoryItemEntity(null)).isNull();
-		}
+    @Nested
+    class toAdminHistoryItemEntity {
+        @Test
+        void entityNull() {
+            assertThat(EntityMapper.toAdminHistoryItemEntity(null)).isNull();
+        }
 
-		@Test
-		void entityNotNull() {
-			final var entity = new AdminActionHistoryItem("userName", LocalDateTime.now(), "actionName",
-				"actionDetails", "status", "statusError");
-			assertThat(EntityMapper.toAdminHistoryItemEntity(entity)).isEqualTo(
-				AdminActionHistoryItemEntity.builder()
-					.userName(entity.userName())
-					.timestamp(entity.timestamp())
-					.actionName(entity.actionName())
-					.actionDetails(entity.actionDetails())
-					.status(entity.status())
-					.statusError(entity.statusError())
-					.build()
-			);
-		}
-	}
+        @Test
+        void entityNotNull() {
+            final LocalDateTime now = LocalDateTime.now();
+            final var item = new AdminActionHistoryItem("userName", now, "actionName",
+                "actionDetails", "status", "statusError");
+            assertThat(EntityMapper.toAdminHistoryItemEntity(item))
+                .usingRecursiveComparison()
+                .ignoringFields("id", "dltEvent")
+                .isEqualTo(
+                    AdminActionHistoryItemEntity.builder()
+                        .userName(item.userName())
+                        .timestamp(item.timestamp())
+                        .actionName(item.actionName())
+                        .actionDetails(item.actionDetails())
+                        .status(item.status())
+                        .statusError(item.statusError())
+                        .build()
+                );
+        }
+    }
 }

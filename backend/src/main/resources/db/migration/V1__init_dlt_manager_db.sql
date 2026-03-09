@@ -8,8 +8,6 @@ CREATE TABLE IF NOT EXISTS dlt_event (
     trace_id                    TEXT,
     payload                     TEXT NOT NULL,
     payload_media_type          TEXT NOT NULL,
-    payload_status              VARCHAR(50) NOT NULL DEFAULT 'UNKNOWN',
-    payload_validation_error    TEXT,
     error                       TEXT,
     stack_trace                 TEXT
 );

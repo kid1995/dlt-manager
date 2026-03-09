@@ -34,3 +34,7 @@ objects:
       SERVICE_SYSTEM: "PRODUKTION"
       LOGBACK_FILE: "logback-json.xml"
       PAPIERANTRAG_EINGANG_SERVICE_URL: "https://prd-papierantrageingang-elpa-pape-prd.cloud.system.local/api"
+      POSTGRES_HOST: "vipsiae11p.system.local"
+      POSTGRES_DB_NAME: "elpapgp"
+      FLYWAY_ENABLED: "true"
+      FLYWAY_LOCATIONS: "db/migration,db/migration_role_schemata_admin"
