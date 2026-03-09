@@ -2,22 +2,31 @@ package de.signaliduna.dltmanager.adapter.db;
 
 import de.signaliduna.dltmanager.adapter.db.model.AdminActionHistoryItemEntity;
 import de.signaliduna.dltmanager.adapter.db.model.DltEventEntity;
-import de.signaliduna.dltmanager.test.AbstractSingletonContainerTest;
+import de.signaliduna.dltmanager.test.ContainerImageNames;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = {"jwt.enabled=false", "com.c4-soft.springaddons.oidc.resourceserver.enabled=false"})
-class DltEventRepositoryIT extends AbstractSingletonContainerTest {
+@DataJpaTest(properties = {"jwt.enabled=false"})
+class DltEventRepositoryIT {
+
+    @Container
+    @ServiceConnection
+    static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer(
+        DockerImageName.parse(ContainerImageNames.POSTGRES.getImageName())
+            .asCompatibleSubstituteFor(PostgreSQLContainer.IMAGE)
+    );
 
     private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 1, 1, 0, 0);
 
@@ -26,11 +35,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
 
     @Autowired
     EntityManager entityManager;
-
-    @AfterEach
-    void afterEach() {
-        dltEventRepository.deleteAll();
-    }
 
     private DltEventEntity createEvent(String dltEventId) {
         return DltEventEntity.builder()
@@ -67,7 +71,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void shouldUpdateExistingEntitiesWithTheSameDltEventId() {
             String id = UUID.randomUUID().toString();
             dltEventRepository.save(createEvent(id));
@@ -86,7 +89,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
     class addAdminAction {
 
         @Test
-        @Transactional
         void shouldAddAdminAction() {
             String id = UUID.randomUUID().toString();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
@@ -103,7 +105,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void shouldReturnNullLastAdminActionWhenNoActions() {
             String id = UUID.randomUUID().toString();
             dltEventRepository.save(createEvent(id));
@@ -121,7 +122,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void withExistingDltEventId() {
             String id = UUID.randomUUID().toString();
             dltEventRepository.save(createEvent(id));
@@ -131,7 +131,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void shouldCascadeDeleteAdminActions() {
             String id = UUID.randomUUID().toString();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
@@ -153,7 +152,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void shouldOrderByLastAdminActionTimestampDesc() {
             String id1 = UUID.randomUUID().toString();
             DltEventEntity event1 = dltEventRepository.save(createEvent(id1));
@@ -181,7 +179,6 @@ class DltEventRepositoryIT extends AbstractSingletonContainerTest {
         }
 
         @Test
-        @Transactional
         void shouldEagerlyLoadAdminActions() {
             String id = UUID.randomUUID().toString();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
