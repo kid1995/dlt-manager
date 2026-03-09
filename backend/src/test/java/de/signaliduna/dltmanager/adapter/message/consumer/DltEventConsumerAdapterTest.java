@@ -57,5 +57,7 @@ class DltEventConsumerAdapterTest {
             .thenThrow(ex);
 
         adapter.dltEventReceived().accept(event);
+
+        verifyNoInteractions(dltEventManager);
     }
 }
