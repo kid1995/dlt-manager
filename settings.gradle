@@ -1,9 +1,7 @@
 pluginManagement {
     repositories {
-        maven {
-            name 'Nexus-Internal Access'
-            url 'https://m2repo.system.local/content/groups/full/'
-        }
+        gradlePluginPortal()
+        mavenCentral()
     }
 }
 

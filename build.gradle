@@ -1,8 +1,6 @@
 buildscript {
 	repositories {
-		maven {
-			url 'https://m2repo.system.local/content/groups/full/'
-		}
+		mavenCentral()
 	}
 
 	dependencies {
@@ -47,9 +45,7 @@ allprojects {
 	group = 'de.signaliduna.elpa.dlt-manager'
 
 	repositories {
-		maven {
-			url "https://m2repo.system.local/content/groups/full/"
-		}
+		mavenLocal()
 		mavenCentral()
 	}
 }
