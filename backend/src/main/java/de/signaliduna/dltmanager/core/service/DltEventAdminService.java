@@ -56,9 +56,9 @@ public class DltEventAdminService {
         final Vorgang vorgang = decodeDltEventPayload(dltEventOpt.get(), Vorgang.class);
         final String rohdatenUuidId = vorgang.metadaten().rohdatenUuid();
         if (rohdatenUuidId == null) {
-            final var errorTxt = "Cannot resend: metadaten.rohdatenUuid of DltEvent %s is null".formatted(dltEventId);
-            log.error(errorTxt);
-            throw new DltEventAdminServiceException(errorTxt);
+            log.error("Cannot resend: metadaten.rohdatenUuid of DltEvent is null");
+            throw new DltEventAdminServiceException(
+                    "Cannot resend: metadaten.rohdatenUuid of DltEvent %s is null".formatted(dltEventId));
         }
         resendPapierantragImpl(dltEventId, rohdatenUuidId, userName);
         return true;
@@ -72,10 +72,10 @@ public class DltEventAdminService {
         
         try {
             papierantragEingangAdapter.resendPapierantrag(rohdatenUuidId);
-            log.info("resent application for dltEventId {} (rohdatenUuidId: {})", dltEventId, rohdatenUuidId);
             dltEventPersistenceAdapter.addAdminAction(dltEventId,
                     adminActionItemBuilder.status(DltEventAction.Status.TRIGGERED.name()).build()
             );
+            log.info("resent application for dltEventId {} (rohdatenUuidId: {})", dltEventId, rohdatenUuidId);
         } catch (FeignException e) {
             // Security: SafeExceptionLogger strips request/response body that may contain PII
             String safeMsg = SafeExceptionLogger.sanitizeFeignException(e);
