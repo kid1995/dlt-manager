@@ -16,3 +16,4 @@ gradle/
 *.gradle
 rewrite/
 migration/
+*.txt
