@@ -28,7 +28,7 @@ class DltEventConsumerAdapterTest {
     DltEventConsumerAdapter adapter;
 
     @Test
-    void onDltEvent_whenManagerThrowsGenericException_shouldLogAndNotRethrow() throws Exception {
+    void onDltEvent_whenManagerThrowsGenericException_shouldLogAndNotRethrow(){
         CloudEvent event = mock(CloudEvent.class);
         CloudEventData data = mock(CloudEventData.class);
         when(event.getId()).thenReturn("test-id");
@@ -45,7 +45,7 @@ class DltEventConsumerAdapterTest {
     }
 
     @Test
-    void onDltEvent_whenJacksonExceptionHasNullLocation_shouldLogUnknownLocation() throws Exception {
+    void onDltEvent_whenJacksonExceptionHasNullLocation_shouldLogUnknownLocation(){
         CloudEvent event = mock(CloudEvent.class);
         CloudEventData data = mock(CloudEventData.class);
         when(event.getId()).thenReturn("test-id");
