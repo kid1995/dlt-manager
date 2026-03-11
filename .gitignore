@@ -18,3 +18,4 @@ rewrite/
 migration/
 *.txt
 .vscode/
+.claude/
