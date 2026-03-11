@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static de.signaliduna.dltmanager.test.SharedTestData.DLT_EVENT_1;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DltEventPersistenceAdapterTest {
 
-    private static final String DLT_EVENT1_ID = DLT_EVENT_1.dltEventId();
+    private static final UUID DLT_EVENT1_ID = DLT_EVENT_1.dltEventId();
 
     @Mock
     DltEventRepository dltEventRepository;

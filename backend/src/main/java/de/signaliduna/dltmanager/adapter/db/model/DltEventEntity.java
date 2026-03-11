@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "dlt_event")
@@ -13,7 +14,7 @@ public class DltEventEntity {
     
     @Id
     @Column(name = "dlt_event_id", nullable = false)
-    private String dltEventId;
+    private UUID dltEventId;
     
     @Column(name = "original_event_id", nullable = false)
     private String originalEventId;
@@ -68,7 +69,7 @@ public class DltEventEntity {
     }
     
     // Getters
-    public String getDltEventId() { return dltEventId; }
+    public UUID getDltEventId() { return dltEventId; }
     public String getOriginalEventId() { return originalEventId; }
     public String getServiceName() { return serviceName; }
     public LocalDateTime getAddToDltTimestamp() { return addToDltTimestamp; }
@@ -108,7 +109,7 @@ public class DltEventEntity {
     public Builder toBuilder() { return new Builder(this); }
     
     public static final class Builder {
-        private String dltEventId;
+        private UUID dltEventId;
         private String originalEventId;
         private String serviceName;
         private LocalDateTime addToDltTimestamp;
@@ -136,7 +137,7 @@ public class DltEventEntity {
             this.stackTrace = source.stackTrace;
         }
         
-        public Builder dltEventId(String value) { this.dltEventId = value; return this; }
+        public Builder dltEventId(UUID value) { this.dltEventId = value; return this; }
         public Builder originalEventId(String value) { this.originalEventId = value; return this; }
         public Builder serviceName(String value) { this.serviceName = value; return this; }
         public Builder addToDltTimestamp(LocalDateTime value) { this.addToDltTimestamp = value; return this; }

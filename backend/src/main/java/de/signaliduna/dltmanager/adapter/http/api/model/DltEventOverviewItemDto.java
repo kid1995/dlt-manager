@@ -5,13 +5,14 @@ import jakarta.annotation.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Contains the parts of a DltEvent that are considered as useful to create an overview. The larger parts
  * of a DltEvent (e.g. payload and stackTrace) are omitted here but can be obtained if so by requesting {@code DltEventDetails}.
  */
 public record DltEventOverviewItemDto(
-	String dltEventId,
+	UUID dltEventId,
 	String originalEventId,
 	String serviceName,
 	LocalDateTime addToDltTimestamp,

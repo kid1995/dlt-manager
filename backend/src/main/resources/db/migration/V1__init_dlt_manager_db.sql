@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS dlt_event (
-    dlt_event_id                TEXT PRIMARY KEY,
+    dlt_event_id                UUID PRIMARY KEY,
     original_event_id           TEXT NOT NULL,
     service_name                TEXT NOT NULL,
     add_to_dlt_timestamp        TIMESTAMP NOT NULL,
@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_dlt_event_trace_id
 
 CREATE TABLE IF NOT EXISTS admin_action_history (
     id                  BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,
-    dlt_event_id        TEXT NOT NULL REFERENCES dlt_event(dlt_event_id) ON DELETE CASCADE,
+    dlt_event_id        UUID NOT NULL REFERENCES dlt_event(dlt_event_id) ON DELETE CASCADE,
     user_name           TEXT NOT NULL,
     performed_at        TIMESTAMP NOT NULL,
     action_name         TEXT NOT NULL,

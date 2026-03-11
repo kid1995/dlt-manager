@@ -32,7 +32,7 @@ class DltEventRepositoryIT {
     @Autowired
     DltEventRepository dltEventRepository;
     
-    private DltEventEntity createEvent(String dltEventId) {
+    private DltEventEntity createEvent(UUID dltEventId) {
         return DltEventEntity.builder()
                 .dltEventId(dltEventId)
                 .originalEventId("originalEventId")
@@ -54,13 +54,13 @@ class DltEventRepositoryIT {
         @Test
         void shouldSaveNewDltEvents() {
             assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).isEmpty();
-            dltEventRepository.save(createEvent(UUID.randomUUID().toString()));
+            dltEventRepository.save(createEvent(UUID.randomUUID()));
             assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
         }
         
         @Test
         void shouldNotInsertTheSameEntityTwice() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             dltEventRepository.save(createEvent(id));
             dltEventRepository.save(createEvent(id));
             assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
@@ -68,7 +68,7 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldUpdateExistingEntitiesWithTheSameDltEventId() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             dltEventRepository.save(createEvent(id));
             DltEventEntity found = dltEventRepository.findById(id).orElseThrow();
             found.setError("updated error");
@@ -86,7 +86,7 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldAddAdminAction() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
             event.addAdminAction(AdminActionHistoryItemEntity.builder()
                     .userName("user1").actionName("RETRY").actionDetails("details")
@@ -101,7 +101,7 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldReturnNullLastAdminActionWhenNoActions() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             dltEventRepository.save(createEvent(id));
             DltEventEntity found = dltEventRepository.findById(id).orElseThrow();
             assertThat(found.getLastAdminAction()).isNull();
@@ -113,12 +113,12 @@ class DltEventRepositoryIT {
         
         @Test
         void withNonExistingDltEventId() {
-            assertThat(dltEventRepository.deleteByDltEventId("non-existing")).isZero();
+            assertThat(dltEventRepository.deleteByDltEventId(UUID.randomUUID())).isZero();
         }
         
         @Test
         void withExistingDltEventId() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             dltEventRepository.save(createEvent(id));
             assertThat(dltEventRepository.findAllOrderedByLastAdminActionDesc()).hasSize(1);
             assertThat(dltEventRepository.deleteByDltEventId(id)).isEqualTo(1L);
@@ -127,7 +127,7 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldCascadeDeleteAdminActions() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
             event.addAdminAction(AdminActionHistoryItemEntity.builder()
                     .userName("user1").actionName("RETRY").timestamp(TIMESTAMP).status("SUCCESS").build());
@@ -148,19 +148,19 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldOrderByLastAdminActionTimestampDesc() {
-            String id1 = UUID.randomUUID().toString();
+            UUID id1 = UUID.randomUUID();
             DltEventEntity event1 = dltEventRepository.save(createEvent(id1));
             event1.addAdminAction(AdminActionHistoryItemEntity.builder()
                     .userName("u").actionName("A").timestamp(TIMESTAMP.plusMinutes(10)).status("OK").build());
             dltEventRepository.save(event1);
             
-            String id2 = UUID.randomUUID().toString();
+            UUID id2 = UUID.randomUUID();
             DltEventEntity event2 = dltEventRepository.save(createEvent(id2));
             event2.addAdminAction(AdminActionHistoryItemEntity.builder()
                     .userName("u").actionName("A").timestamp(TIMESTAMP.plusMinutes(5)).status("OK").build());
             dltEventRepository.save(event2);
             
-            String id3 = UUID.randomUUID().toString();
+            UUID id3 = UUID.randomUUID();
             dltEventRepository.save(createEvent(id3));
             
 
@@ -174,7 +174,7 @@ class DltEventRepositoryIT {
         
         @Test
         void shouldEagerlyLoadAdminActions() {
-            String id = UUID.randomUUID().toString();
+            UUID id = UUID.randomUUID();
             DltEventEntity event = dltEventRepository.save(createEvent(id));
             event.addAdminAction(AdminActionHistoryItemEntity.builder()
                     .userName("user").actionName("RETRY").timestamp(TIMESTAMP).status("OK").build());

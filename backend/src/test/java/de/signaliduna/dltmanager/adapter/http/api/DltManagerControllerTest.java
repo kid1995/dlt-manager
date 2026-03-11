@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static de.signaliduna.dltmanager.test.TestUtil.assertThatJsonString;
 import static de.signaliduna.dltmanager.test.TestUtil.captureSingleArg;
@@ -52,7 +53,7 @@ class DltManagerControllerTest {
 
 	private static final String AUTH_USER = "S12345";
 
-	private static final String DLT_EVENT1_ID = SharedTestData.DLT_EVENT_1.dltEventId();
+	private static final UUID DLT_EVENT1_ID = SharedTestData.DLT_EVENT_1.dltEventId();
 
 	@Autowired
 	MockMvc mockMvc;
@@ -146,7 +147,7 @@ class DltManagerControllerTest {
 					{
 					  "dltEventItems": [
 					    {
-					      "dltEventId": "dltEvent1Id",
+					      "dltEventId": "00000000-0000-0000-0000-000000000001",
 					      "originalEventId": "originalEvent1Id",
 					      "serviceName": "partnersync",
 					      "addToDltTimestamp": "2024-01-01T01:01:00",
@@ -187,7 +188,7 @@ class DltManagerControllerTest {
 
 			assertThatJsonString(mvcResult.getResponse().getContentAsString()).isEqualTo("""
 					{
-						"dltEventId": "dltEvent1Id",
+						"dltEventId": "00000000-0000-0000-0000-000000000001",
 						"originalEventId": "originalEvent1Id",
 						"serviceName": "partnersync",
 						"addToDltTimestamp": "2024-01-01T01:01:00",
@@ -227,7 +228,7 @@ class DltManagerControllerTest {
 
 			assertThatJsonString(mvcResult.getResponse().getContentAsString()).isEqualTo("""
 				{
-				  "dltEventId": "dltEvent1Id",
+				  "dltEventId": "00000000-0000-0000-0000-000000000001",
 				  "originalEventId": "originalEvent1Id",
 				  "serviceName": "partnersync",
 				  "addToDltTimestamp": "2024-01-01T01:01:00",

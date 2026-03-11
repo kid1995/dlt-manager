@@ -3,9 +3,10 @@ package de.signaliduna.dltmanager.core.model;
 import jakarta.annotation.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record DltEvent(
-        String dltEventId,
+        UUID dltEventId,
         String originalEventId,
         String serviceName,
         LocalDateTime addToDltTimestamp,
@@ -36,7 +37,7 @@ public record DltEvent(
     }
     
     public static final class Builder {
-        private String dltEventId;
+        private UUID dltEventId;
         private String originalEventId;
         private String serviceName;
         private LocalDateTime addToDltTimestamp;
@@ -73,7 +74,7 @@ public record DltEvent(
             this.lastAdminAction = source.lastAdminAction;
         }
         
-        public Builder dltEventId(String dltEventId) {
+        public Builder dltEventId(UUID dltEventId) {
             this.dltEventId = dltEventId;
             return this;
         }

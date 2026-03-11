@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface DltEventRepository extends JpaRepository<DltEventEntity, String> {
+public interface DltEventRepository extends JpaRepository<DltEventEntity, UUID> {
 
     @EntityGraph(attributePaths = "adminActions")
     @Query("""
@@ -20,5 +21,5 @@ public interface DltEventRepository extends JpaRepository<DltEventEntity, String
         """)
     List<DltEventEntity> findAllOrderedByLastAdminActionDesc();
 
-    long deleteByDltEventId(String dltEventId);
+    long deleteByDltEventId(UUID dltEventId);
 }

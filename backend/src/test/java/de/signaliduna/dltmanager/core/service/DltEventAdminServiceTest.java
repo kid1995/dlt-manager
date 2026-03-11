@@ -12,6 +12,8 @@ import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +33,7 @@ class DltEventAdminServiceTest {
 	@Test
 	void deleteDltEvent_whenDltEventPersistenceAdapterThrows() {
 		when(dltEventPersistenceAdapter.deleteByDltEventId(any())).thenThrow(new RuntimeException("Bad thing happened"));
-		Assertions.assertThatThrownBy(() -> dltEventAdminService.deleteDltEvent("eventId", "userName"))
+		Assertions.assertThatThrownBy(() -> dltEventAdminService.deleteDltEvent(UUID.randomUUID(), "userName"))
 			.hasMessageContaining("Bad thing happened");
 	}
 

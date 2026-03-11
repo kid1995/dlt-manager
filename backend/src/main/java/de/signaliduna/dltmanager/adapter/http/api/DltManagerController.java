@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequestMapping("/api")
 @PreAuthorize("isAuthenticated() and isAuthorizedUser()")
@@ -33,21 +34,21 @@ public class DltManagerController {
     
     @GetMapping("/events/overview/{dltEventId}")
     @Operation(summary = "Provides overview data for the DltEvent with the given dltEventId.")
-    public ResponseEntity<DltEventOverviewItemDto> getDltEventOverviewItemByDltEventId(@PathVariable("dltEventId") String dltEventId) {
+    public ResponseEntity<DltEventOverviewItemDto> getDltEventOverviewItemByDltEventId(@PathVariable("dltEventId") UUID dltEventId) {
         return adminService.getDltEventByDltEventId(dltEventId).map(ApiModelMapper::toDltEventOverviewItemDto).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @GetMapping("/events/details/{dltEventId}")
     @Operation(summary = "Provides details for the given dltEventId.")
-    public ResponseEntity<DltEventFullItemDto> getDltEventDetails(@PathVariable("dltEventId") String dltEventId) {
+    public ResponseEntity<DltEventFullItemDto> getDltEventDetails(@PathVariable("dltEventId") UUID dltEventId) {
         return adminService.getDltEventByDltEventId(dltEventId).map(ApiModelMapper::toDltEventFullItemDto).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     @PostMapping("/events/re-processing/{dltEventId}")
     @Operation(summary = "Triggers a re-processing of the original event that caused the specified DltEvent.")
-    public ResponseEntity<Void> triggerReprocessing(@PathVariable("dltEventId") String dltEventId, Authentication authentication) {
+    public ResponseEntity<Void> triggerReprocessing(@PathVariable("dltEventId") UUID dltEventId, Authentication authentication) {
         if (adminService.resendPapierantrag(dltEventId, authentication.getName())) {
             return ResponseEntity.ok().build();
         }
@@ -56,7 +57,7 @@ public class DltManagerController {
     
     @DeleteMapping("/events/{dltEventId}")
     @Operation(summary = "Deletes the DltEvent with the given dltEventId.")
-    public ResponseEntity<Void> deleteDltEvent(@PathVariable("dltEventId") String dltEventId, Authentication authentication) {
+    public ResponseEntity<Void> deleteDltEvent(@PathVariable("dltEventId") UUID dltEventId, Authentication authentication) {
         if (adminService.deleteDltEvent(dltEventId, authentication.getName())) {
             return ResponseEntity.noContent().build();
         }

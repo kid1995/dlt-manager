@@ -15,6 +15,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class DltEventAdminService {
     private static final Logger log = LoggerFactory.getLogger(DltEventAdminService.class);
@@ -38,7 +39,7 @@ public class DltEventAdminService {
                 .toList();
     }
     
-    public Optional<DltEventWithAdminActions> getDltEventByDltEventId(String dltEventId) {
+    public Optional<DltEventWithAdminActions> getDltEventByDltEventId(UUID dltEventId) {
         return dltEventPersistenceAdapter.findDltEventById(dltEventId).map(dltEvent ->
                 new DltEventWithAdminActions(dltEvent, getAvailableAdminActionsFor(dltEvent))
         );
@@ -46,7 +47,7 @@ public class DltEventAdminService {
     
     // --- Resend / Delete ---
     
-    public boolean resendPapierantrag(String dltEventId, String userName) {
+    public boolean resendPapierantrag(UUID dltEventId, String userName) {
         log.info("resending application for DltEventId {} to PapierantragEingang", dltEventId);
         Optional<DltEvent> dltEventOpt = dltEventPersistenceAdapter.findDltEventById(dltEventId);
         if (dltEventOpt.isEmpty()) {
@@ -64,7 +65,7 @@ public class DltEventAdminService {
         return true;
     }
     
-    void resendPapierantragImpl(String dltEventId, String rohdatenUuidId, String userName) {
+    void resendPapierantragImpl(UUID dltEventId, String rohdatenUuidId, String userName) {
         final var adminActionItemBuilder = AdminActionHistoryItem.builder()
                 .actionName(AdminAction.RESEND_TO_PAPIERANTRAG_EINGANG.name())
                 .timestamp(LocalDateTime.now())
@@ -75,7 +76,7 @@ public class DltEventAdminService {
             dltEventPersistenceAdapter.addAdminAction(dltEventId,
                     adminActionItemBuilder.status(DltEventAction.Status.TRIGGERED.name()).build()
             );
-            final String safeDltEventId = SafeExceptionLogger.sanitizeLogArg(dltEventId);
+            final String safeDltEventId = SafeExceptionLogger.sanitizeLogArg(dltEventId.toString());
             final String safeRohdatenUuidId = SafeExceptionLogger.sanitizeLogArg(rohdatenUuidId);
             log.info("resent application for dltEventId {} (rohdatenUuidId: {})", safeDltEventId, safeRohdatenUuidId);
         } catch (FeignException e) {
@@ -91,7 +92,7 @@ public class DltEventAdminService {
         }
     }
     
-    public boolean deleteDltEvent(String dltEventId, String userName) {
+    public boolean deleteDltEvent(UUID dltEventId, String userName) {
         log.info("deleting DltEvent with dltEventId {}", dltEventId);
         try {
             return dltEventPersistenceAdapter.deleteByDltEventId(dltEventId);

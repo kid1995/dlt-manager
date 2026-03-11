@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class DltEventPersistenceAdapter {
@@ -31,12 +32,12 @@ public class DltEventPersistenceAdapter {
     }
     
     @Transactional(readOnly = true)
-    public Optional<DltEvent> findDltEventById(String dltEventId) {
+    public Optional<DltEvent> findDltEventById(UUID dltEventId) {
         return dltEventRepository.findById(dltEventId).map(EntityMapper::fromDltEventEntity);
     }
     
     @Transactional
-    public boolean addAdminAction(String dltEventId, AdminActionHistoryItem adminActionHistoryItem) {
+    public boolean addAdminAction(UUID dltEventId, AdminActionHistoryItem adminActionHistoryItem) {
         return dltEventRepository.findById(dltEventId)
                 .map(entity -> {
                     final AdminActionHistoryItemEntity actionEntity = EntityMapper.toAdminHistoryItemEntity(adminActionHistoryItem);
@@ -51,7 +52,7 @@ public class DltEventPersistenceAdapter {
         dltEventRepository.save(EntityMapper.toDltEventEntity(dltEvent));
     }
     
-    public boolean deleteByDltEventId(String dltEventId) {
+    public boolean deleteByDltEventId(UUID dltEventId) {
         log.debug("deleting DLT event with dltEventId: {}", dltEventId);
         return dltEventRepository.deleteByDltEventId(dltEventId) > 0;
     }

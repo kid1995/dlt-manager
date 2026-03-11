@@ -5,6 +5,7 @@ import de.signaliduna.elpa.sharedlib.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static de.signaliduna.dltmanager.test.TestUtil.asJsonString;
 
@@ -53,7 +54,7 @@ public class SharedTestData {
 
 
 	public static final DltEvent DLT_EVENT_1 = DltEvent.builder()
-		.dltEventId("dltEvent1Id")
+		.dltEventId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 		.originalEventId("originalEvent1Id")
 		.serviceName("partnersync")
 		.addToDltTimestamp(LocalDateTime.of(2024, 1, 1, 1, 1))
