@@ -62,9 +62,12 @@ spring:
 
   flyway:
     locations: ${FLYWAY_LOCATIONS:db/migration}
+    validateMigrationNaming: true
     schemas: ${postgres.schema}
-    validate-migration-naming: true
-    baseline-on-migrate: true
+    placeholders:
+      schema: ${postgres.schema}
+      role: ${FLYWAY_ROLE:elpapg_role_hint_admin}
+    baselineOnMigrate: true
     enabled: ${FLYWAY_ENABLED:true}
 
 postgres:
