@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,7 +32,7 @@ class DltEventConsumerAdapterTest {
     void onDltEvent_whenManagerThrowsGenericException_shouldLogAndNotRethrow(){
         CloudEvent event = mock(CloudEvent.class);
         CloudEventData data = mock(CloudEventData.class);
-        when(event.getId()).thenReturn("test-id");
+        when(event.getId()).thenReturn(UUID.randomUUID().toString());
         when(event.getData()).thenReturn(data);
         when(data.toBytes()).thenReturn("{}".getBytes(StandardCharsets.UTF_8));
         when(jsonMapper.readValue(any(byte[].class), eq(de.signaliduna.dltmanager.adapter.message.consumer.model.DltEventData.class)))
@@ -48,7 +49,7 @@ class DltEventConsumerAdapterTest {
     void onDltEvent_whenJacksonExceptionHasNullLocation_shouldLogUnknownLocation(){
         CloudEvent event = mock(CloudEvent.class);
         CloudEventData data = mock(CloudEventData.class);
-        when(event.getId()).thenReturn("test-id");
+        when(event.getId()).thenReturn(UUID.randomUUID().toString());
         when(event.getData()).thenReturn(data);
         when(data.toBytes()).thenReturn("bad".getBytes(StandardCharsets.UTF_8));
         tools.jackson.core.exc.StreamReadException ex = mock(tools.jackson.core.exc.StreamReadException.class);
