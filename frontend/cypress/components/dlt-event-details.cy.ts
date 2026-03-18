@@ -6,7 +6,7 @@ import { DltEventFullItemComponent } from '../../src/app/components/dlt-event-de
 import { DltManagerService } from '../../src/app/services/dlt-manager/dlt-manager.service'
 import { DltEventFullItem } from '../../src/app/services/dlt-manager/model/DltEventFullItem'
 
-import { SignalIdunaUiModule } from '@signal-iduna/ui-angular-proxy'
+import { SiHeadingNg, SiButtonNg, SiIconNg, SiKeyValueNg, SiExpanderNg } from '@signal-iduna/ui-angular'
 import ObjectUtils from '../../src/app/util/object-utils'
 import { generateTestDltEventDetails } from '../helpers/fake-dlt-events'
 import { routes } from '../../src/app/app.routes'
@@ -16,7 +16,7 @@ interface MockDltManagerServiceType {
 }
 
 describe('DltEventFullItemComponent', () => {
-  const SI_KEY_VALUE_COMPONENT_PREFIX = 'si-key-value-multitype'
+  const SI_KEY_VALUE_COMPONENT_PREFIX = 'si-key-value'
   const SI_KEY_SLOT = 'div[slot="key"]'
   const SI_VALUE_SLOT = 'div[slot="value"]'
   const SI_EXPANDER_COMPONENT_PREFIX = 'si-expander'
@@ -35,7 +35,7 @@ describe('DltEventFullItemComponent', () => {
       }
 
       mount(DltEventFullItemComponent, {
-        imports: [CommonModule, MatTooltipModule, SignalIdunaUiModule],
+        imports: [CommonModule, MatTooltipModule, SiHeadingNg, SiButtonNg, SiIconNg, SiKeyValueNg, SiExpanderNg],
         providers: [
           provideRouter(routes),
           { provide: DltManagerService, useValue: mockDltService },
@@ -118,32 +118,32 @@ describe('DltEventFullItemComponent', () => {
 
     it('should display raw data in expander if available', () => {
       cy.get(
-        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'DLT Event (raw data)')}`,
+        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'DLT Event (raw data)')}`,
       ).should('exist')
       cy.get(
-        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'DLT Event (raw data)')} pre`,
+        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'DLT Event (raw data)')} pre`,
       ).should('contain.text', JSON.stringify(testDltEventDetails, null, 2))
     })
 
     it('should display the payload expander if available', () => {
       cy.get(
-        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'Payload')}`,
+        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'Payload')}`,
       ).should('exist')
       cy.get(
-        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'Payload')} pre`,
+        `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'Payload')} pre`,
       ).should('contain.text', testDltEventDetails.payload)
     })
 
     it('should display the stack trace expander if available', () => {
       if (testDltEventDetails.stackTrace) {
         cy.get(
-          `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'Stacktrace')}`,
+          `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'Stacktrace')}`,
         ).should('exist')
         cy.get(
-          `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('title', 'Stacktrace')} pre`,
+          `${SI_EXPANDER_COMPONENT_PREFIX}${getComponentAttributeTag('si-summary', 'Stacktrace')} pre`,
         ).should('contain.text', testDltEventDetails.stackTrace)
       } else {
-        cy.get('si-expander[title="Stacktrace"]').should('not.exist')
+        cy.get('si-expander[si-summary="Stacktrace"]').should('not.exist')
       }
     })
   })

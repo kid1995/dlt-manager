@@ -1,17 +1,18 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress'
 
 export default defineConfig({
+  includeShadowDom: true,
   component: {
     devServer: {
-      framework: "angular",
-      bundler: "webpack",
+      framework: 'angular',
+      bundler: 'webpack',
     },
-    env:{
+    env: {
       numberOfTestData: 100,
-      debugDelay: 1
+      debugDelay: 1,
     },
     viewportWidth: 4000,
     viewportHeight: 4000,
-    specPattern: "cypress/components/**/*.cy.ts",
+    specPattern: 'cypress/components/**/*.cy.ts',
   },
-});
+})

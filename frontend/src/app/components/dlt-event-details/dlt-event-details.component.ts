@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common'
-import {
-  ChangeDetectorRef,
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  inject,
-  OnInit,
-} from '@angular/core'
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { ActivatedRoute } from '@angular/router'
-import '@signal-iduna/ui'
-import { SignalIdunaUiModule } from '@signal-iduna/ui-angular-proxy'
+import {
+  SiHeadingNg,
+  SiButtonNg,
+  SiIconNg,
+  SiKeyValueNg,
+  SiExpanderNg,
+} from '@signal-iduna/ui-angular'
 import { NGXLogger } from 'ngx-logger'
 import { DltManagerService } from '../../services/dlt-manager/dlt-manager.service'
 import { DltEventFullItem } from '../../services/dlt-manager/model/DltEventFullItem'
@@ -18,8 +17,15 @@ import ObjectUtils from '../../util/object-utils'
 @Component({
   selector: 'app-dlt-event-details',
   standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [CommonModule, MatTooltipModule, SignalIdunaUiModule],
+  imports: [
+    CommonModule,
+    MatTooltipModule,
+    SiHeadingNg,
+    SiButtonNg,
+    SiIconNg,
+    SiKeyValueNg,
+    SiExpanderNg,
+  ],
   templateUrl: './dlt-event-details.component.html',
   styleUrl: './dlt-event-details.component.scss',
 })

@@ -30,30 +30,24 @@
                 "input": "public"
               },
               {
-                "glob": "**/*",
-                "input": "./node_modules/@signal-iduna/ui-components/src/assets",
-                "output": "/assets/"
-              },
-              {
                 "glob": "*",
-                "input": "node_modules/@signal-iduna/ui/public/assets/icons/",
+                "input": "node_modules/@signal-iduna/ui/assets/icons/",
                 "output": "."
               },
               {
                 "glob": "*",
-                "input": "node_modules/@signal-iduna/ui/public/assets/font/",
+                "input": "node_modules/@signal-iduna/ui/assets/font/",
                 "output": "assets/font"
               }
             ],
             "styles": [
-              "node_modules/@signal-iduna/ui/public/assets/styles/reset.css",
-              "node_modules/@signal-iduna/ui/public/assets/styles/tokens.css",
-              "node_modules/@signal-iduna/ui/public/assets/styles/font.css",
-              "node_modules/@signal-iduna/ui/public/assets/styles/variables.scss",
+              "node_modules/@signal-iduna/ui/assets/styles/tokens.css",
+              "node_modules/@signal-iduna/ui/assets/styles/font.css",
+              "node_modules/@signal-iduna/ui/assets/styles/variables.scss",
               "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.scss"
             ],
-            "scripts": ["node_modules/@signal-iduna/ui/public/index.js"]
+            "scripts": ["node_modules/@signal-iduna/ui/index.js"]
           },
           "configurations": {
             "production": {

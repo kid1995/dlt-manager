@@ -16,6 +16,16 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Suppress CustomElementRegistry double-registration errors from @signal-iduna/ui
+// Web Components register globally via ES module side effects. When Cypress re-mounts
+// components between tests, the custom elements may already be registered.
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('has already been used with this registry')) {
+    return false
+  }
+  return true
+})
+
 import { mount } from 'cypress/angular'
 
 // Augment the Cypress namespace to include type definitions for

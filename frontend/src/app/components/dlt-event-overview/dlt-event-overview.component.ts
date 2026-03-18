@@ -3,14 +3,23 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  CUSTOM_ELEMENTS_SCHEMA,
   inject,
   OnInit,
 } from '@angular/core'
 import { MatTooltipModule } from '@angular/material/tooltip'
-import '@signal-iduna/ui'
-import { TableCellSortOrder } from '@signal-iduna/ui'
-import { SignalIdunaUiModule } from '@signal-iduna/ui-angular-proxy'
+import {
+  SiTableCellSortOrder,
+  TableCellSortEventBody,
+} from '@signal-iduna/ui-angular'
+import {
+  SiButtonNg,
+  SiIconNg,
+  SiTableNg,
+  SiTableHeaderNg,
+  SiTableBodyNg,
+  SiTableRowNg,
+  SiTableCellNg,
+} from '@signal-iduna/ui-angular'
 import { NGXLogger } from 'ngx-logger'
 import { DltManagerService } from '../../services/dlt-manager/dlt-manager.service'
 import { DltEventOverviewItem } from '../../services/dlt-manager/model/DltEventOverviewItem'
@@ -20,8 +29,17 @@ import { Router } from '@angular/router'
 @Component({
   selector: 'app-admin',
   standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [CommonModule, MatTooltipModule, SignalIdunaUiModule],
+  imports: [
+    CommonModule,
+    MatTooltipModule,
+    SiButtonNg,
+    SiIconNg,
+    SiTableNg,
+    SiTableHeaderNg,
+    SiTableBodyNg,
+    SiTableRowNg,
+    SiTableCellNg,
+  ],
   templateUrl: './dlt-event-overview.component.html',
   styleUrl: './dlt-event-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,7 +57,7 @@ export class DltEventOverviewComponent implements OnInit {
     {
       label: 'Date',
       sortKey: 'addToDltTimestamp',
-      sortOrder: 'desc',
+      sortOrder: 'descending',
     },
     {
       label: 'Service',
@@ -73,7 +91,6 @@ export class DltEventOverviewComponent implements OnInit {
     },
     {
       label: 'Action',
-      sortKey: null,
       sortOrder: null,
     },
   ]
@@ -167,22 +184,29 @@ export class DltEventOverviewComponent implements OnInit {
     return this.router.navigate(['/', 'dlt-event-details', dltEventId])
   }
 
-  private readonly sortCycleMap: Map<string | null, TableCellSortOrder> =
-    new Map<string | null, TableCellSortOrder>([
-      [null, 'asc'],
-      ['asc', 'desc'],
-      ['desc', null],
-    ])
+  private readonly sortCycleMap: Map<
+    SiTableCellSortOrder,
+    SiTableCellSortOrder
+  > = new Map<SiTableCellSortOrder, SiTableCellSortOrder>([
+    [null, 'ascending'],
+    ['ascending', 'descending'],
+    ['descending', null],
+  ])
 
-  public onSort(event: CustomEvent) {
-    const sortKey: string = event.detail.sortKey
+  public onSort(event: TableCellSortEventBody<Record<string, unknown>>) {
+    // Angular proxy types this as TableCellSortEventBody but at runtime
+    // it's a CustomEvent with data in event.detail
+    const rawEvent = event as unknown as CustomEvent<
+      TableCellSortEventBody<Record<string, unknown>>
+    >
+    const sortKey: string = rawEvent.detail.sortKey as string
 
     const heading: TableHeaderDef | undefined = this.headerDefs.find(
       (heading) => heading?.sortKey === sortKey,
     )
     if (!heading) return
 
-    const newSortOrder: TableCellSortOrder =
+    const newSortOrder: SiTableCellSortOrder =
       this.sortCycleMap.get(heading.sortOrder) ?? null
 
     // Set the new sortKey & reset other headerDefs
@@ -207,7 +231,7 @@ export class DltEventOverviewComponent implements OnInit {
   private static sortRowData(
     toSort: readonly DltEventOverviewItem[],
     sortKey: string,
-    sortOrder: TableCellSortOrder,
+    sortOrder: SiTableCellSortOrder,
   ): readonly DltEventOverviewItem[] {
     const sortedItems = toSort.slice()
     sortedItems.sort(
@@ -221,7 +245,7 @@ export class DltEventOverviewComponent implements OnInit {
           sortKey,
         )
         const compareResult: number = ObjectUtils.compare(a, b)
-        return sortOrder === 'desc' ? -compareResult : compareResult
+        return sortOrder === 'descending' ? -compareResult : compareResult
       },
     )
     return sortedItems
@@ -230,6 +254,6 @@ export class DltEventOverviewComponent implements OnInit {
 
 export interface TableHeaderDef {
   label: string
-  sortKey?: string | null
-  sortOrder: TableCellSortOrder
+  sortKey?: string
+  sortOrder: SiTableCellSortOrder
 }
