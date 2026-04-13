@@ -1,15 +1,15 @@
-import { AppConfig } from "../app/app.config"
+import { AppConfig } from '../app/app.config'
 
 //AppConfig for local development (used )
 export const environment: AppConfig = {
   production: false,
   backendUrl: 'http://localhost:8080',
   oidc: {
-    issuer: 'https://employee.login.int.signal-iduna.org/',
+    issuer: 'http://localhost:8180/realms/lab',
     clientId: '8d12476c2684592b12515daab4ca0ddb72007118-E',
     showDebug: true,
     identityConfig: true,
-  }
+  },
 }
 
 /*

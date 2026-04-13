@@ -1,30 +1,26 @@
-<main class="main">
-  <div class="content">
-    <si-header si-title="ELPA:4 DLT Admin UI">
-      <a href="/" title="Signal Iduna Startseite" slot="logo"
-        ><si-header-logo></si-header-logo
-      ></a>
-      @if (isAuthenticated()) {
-        <si-header-menu>
-          <ul>
-            <li>
-              <si-header-menu-item si-text-visibility="all">
-                <a href="javascript:void(0)" title="Logout" (click)="logout()">
-                  <si-icon
-                    si-width="24px"
-                    si-height="24px"
-                    si-svg="functionalLogin"
-                    si-sprite="essentials"
-                  ></si-icon>
-                  Logout
-                </a>
-              </si-header-menu-item>
-            </li>
-          </ul>
-        </si-header-menu>
-      }
-    </si-header>
-  </div>
-</main>
+<si-header si-title="ELPA:4 DLT Admin UI">
+  <a href="/" slot="logo" aria-label="home">
+    <si-header-logo></si-header-logo>
+  </a>
+  @if (isAuthenticated()) {
+    <si-header-menu>
+      <ul>
+        <li>
+          <si-header-menu-item si-text-visibility="all">
+            <a href="javascript:void(0)" title="Logout" (click)="logout()">
+              <si-icon
+                si-width="24px"
+                si-height="24px"
+                si-svg="functionalLogin"
+                si-sprite="essentials"
+              ></si-icon>
+              Logout
+            </a>
+          </si-header-menu-item>
+        </li>
+      </ul>
+    </si-header-menu>
+  }
+</si-header>
 
 <router-outlet />

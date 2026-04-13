@@ -47,7 +47,7 @@
               "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.scss"
             ],
-            "scripts": ["node_modules/@signal-iduna/ui/index.js"]
+            "scripts": []
           },
           "configurations": {
             "production": {
