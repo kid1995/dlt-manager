@@ -1,0 +1,57 @@
+# DLT Manager — PRD environment values
+
+component: backend
+stage: prd
+replicas: 2
+revisionHistoryLimit: 1
+
+image:
+  repository: prod.docker.system.local/elpa-dltmanager/dltmanager
+  tag: ""
+
+frontendImage:
+  repository: prod.docker.system.local/elpa-dltmanager/dltmanager-ui
+  tag: ""
+
+jwt:
+  url: https://employee.login.signal-iduna.org/
+  authorizedUsers: S000374
+
+postgres:
+  host: vipsiae11p.system-a.local
+  port: "5432"
+  database: elpapgp
+  schema: dlt_manager
+  user: elpa_dltmanager_prd
+  sslMode: prefer
+  flywayEnabled: "true"
+
+kafka:
+  bootstrapServers: bootstrap-nop.kafka.svc.cluster.local:9093
+  oauthTokenEndpoint: https://employee.login.signal-iduna.org/protocol/openid-connect/token
+  securityProtocol: SASL_PLAINTEXT
+
+secrets:
+  name: elpa-secrets
+
+logLevel: INFO
+logLevelSi: INFO
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 500Mi
+  limits:
+    cpu: 400m
+    memory: 950Mi
+
+frontendResources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 100m
+    memory: 100Mi
+
+frontend:
+  backendUrl: https://prd-dltmanager-elpa-elpa4.copsinop.de

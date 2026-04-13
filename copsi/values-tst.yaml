@@ -1,0 +1,69 @@
+# DLT Manager — TST environment values
+# Used by: helm template --values values-tst.yaml .
+# Component switch: --set component=frontend for frontend deployment
+
+component: backend
+stage: tst
+replicas: 1
+revisionHistoryLimit: 0
+
+# Backend image
+image:
+  repository: dev.docker.system.local/elpa-dltmanager-tst/dltmanager
+  tag: PLACEHOLDER
+
+# Frontend image (used when --set component=frontend)
+frontendImage:
+  repository: dev.docker.system.local/elpa-dltmanager-tst/dltmanager-ui
+  tag: PLACEHOLDER
+
+# Authentication
+jwt:
+  url: https://employee.login.int.signal-iduna.org/
+  authorizedUsers: S000325
+
+# PostgreSQL
+postgres:
+  host: vipsiae11t.system-a.local
+  port: "5432"
+  database: elpapgt
+  schema: dlt_manager
+  user: elpa_dltmanager_tst
+  sslMode: prefer
+  flywayEnabled: "true"
+
+# Kafka
+kafka:
+  bootstrapServers: bootstrap-nop.kafka.svc.cluster.local:9093
+  oauthTokenEndpoint: https://employee.login.int.signal-iduna.org/protocol/openid-connect/token
+  securityProtocol: SASL_PLAINTEXT
+
+# Secrets
+secrets:
+  name: elpa-secrets
+
+# Logging
+logLevel: INFO
+logLevelSi: DEBUG
+
+# Backend resources
+resources:
+  requests:
+    cpu: 200m
+    memory: 500Mi
+  limits:
+    cpu: 400m
+    memory: 950Mi
+
+# Frontend resources
+frontendResources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 100m
+    memory: 100Mi
+
+# Frontend config
+frontend:
+  backendUrl: https://tst-dltmanager-elpa-elpa4.copsinop.de

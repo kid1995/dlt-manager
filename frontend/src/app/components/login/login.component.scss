@@ -1,4 +1,4 @@
-@import "@signal-iduna/ui/assets/styles/variables.scss";
+@use "@signal-iduna/ui/assets/styles/variables.scss" as *;
 
 :host {
   display: flex;

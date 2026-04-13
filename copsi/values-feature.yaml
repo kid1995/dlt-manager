@@ -1,0 +1,61 @@
+# DLT Manager — Feature branch values
+# Override at deploy time:
+#   --set image.tag=<commit>.<build>
+#   --set stage=feat-<ticket>
+#   --set postgres.schema=dma_<branch>
+
+component: backend
+stage: feat-
+replicas: 1
+revisionHistoryLimit: 0
+
+image:
+  repository: dev.docker.system.local/elpa-dltmanager-tst/dltmanager
+  tag: does-not-exist
+
+frontendImage:
+  repository: dev.docker.system.local/elpa-dltmanager-tst/dltmanager-ui
+  tag: does-not-exist
+
+jwt:
+  url: https://employee.login.int.signal-iduna.org/
+  authorizedUsers: S000325
+
+postgres:
+  host: vipsiae11t.system-a.local
+  port: "5432"
+  database: elpapgt
+  schema: dma_feature
+  user: elpa_dltmanager_tst
+  sslMode: prefer
+  flywayEnabled: "true"
+
+kafka:
+  bootstrapServers: bootstrap-nop.kafka.svc.cluster.local:9093
+  oauthTokenEndpoint: https://employee.login.int.signal-iduna.org/protocol/openid-connect/token
+  securityProtocol: SASL_PLAINTEXT
+
+secrets:
+  name: elpa-secrets
+
+logLevel: INFO
+logLevelSi: DEBUG
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 500Mi
+  limits:
+    cpu: 400m
+    memory: 950Mi
+
+frontendResources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 100m
+    memory: 100Mi
+
+frontend:
+  backendUrl: https://feat-dltmanager-elpa-elpa4.copsinop.de

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "copsi.name" . }}-config
+  labels:
+    {{- include "copsi.labels" . | nindent 4 }}
+data:
+{{- if eq .Values.component "frontend" }}
+  BACKEND_URL: {{ .Values.frontend.backendUrl | quote }}
+  AUTH_URL: {{ .Values.jwt.url | quote }}
+  ENABLE_JSON_LOGGING: "true"
+  LOG_LEVEL: {{ .Values.logLevel | default "INFO" | quote }}
+{{- else }}
+  JAVA_OPTS: "-XX:MaxRAMPercentage=50 -XX:+UseSerialGC"
+  ENABLE_JSON_LOGGING: "true"
+  LOG_LEVEL: {{ .Values.logLevel | default "INFO" | quote }}
+  LOG_LEVEL_SI: {{ .Values.logLevelSi | default "DEBUG" | quote }}
+  # Authentication
+  JWT_URL: {{ .Values.jwt.url | quote }}
+  AUTH_USERS: {{ .Values.jwt.authorizedUsers | quote }}
+  # PostgreSQL
+  POSTGRES_HOST: {{ .Values.postgres.host | quote }}
+  POSTGRES_PORT: {{ .Values.postgres.port | default "5432" | quote }}
+  POSTGRES_DB: {{ .Values.postgres.database | quote }}
+  POSTGRES_SCHEMA: {{ .Values.postgres.schema | quote }}
+  POSTGRES_USER: {{ .Values.postgres.user | quote }}
+  POSTGRES_SSL_MODE: {{ .Values.postgres.sslMode | default "prefer" | quote }}
+  FLYWAY_ENABLED: {{ .Values.postgres.flywayEnabled | default "true" | quote }}
+  FLYWAY_LOCATIONS: "db/migration"
+  # Kafka
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.bootstrapServers | quote }}
+  KAFKA_SECURITY_PROTOCOL: {{ .Values.kafka.securityProtocol | default "SASL_PLAINTEXT" | quote }}
+  # Deployment
+  ENVIRONMENT: {{ .Values.stage | quote }}
+{{- end }}

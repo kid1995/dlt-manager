@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "copsi.name" . }}
+  labels:
+    {{- include "copsi.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 0 }}
+  selector:
+    matchLabels:
+      {{- include "copsi.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "copsi.selectorLabels" . | nindent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+        prometheus.io/scrape: "true"
+        {{- if eq .Values.component "backend" }}
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+        {{- end }}
+    spec:
+      {{- if eq .Values.component "backend" }}
+      serviceAccountName: identity
+      {{- end }}
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        runAsNonRoot: true
+      containers:
+        - name: {{ include "copsi.name" . }}
+          {{- if eq .Values.component "frontend" }}
+          image: "{{ .Values.frontendImage.repository }}:{{ .Values.frontendImage.tag | default .Chart.AppVersion }}"
+          {{- else }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: Always
+          {{- if eq .Values.component "backend" }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "copsi.name" . }}-config
+          env:
+            - name: ENVIRONMENT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['environment']
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SPRING_DATA_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.name }}
+                  key: mongodb-password
+                  optional: true
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.name }}
+                  key: postgres-password
+                  optional: true
+            - name: KAFKA_OAUTH_TOKEN_ENDPOINT_URI
+              value: {{ .Values.kafka.oauthTokenEndpoint | quote }}
+            - name: KAFKA_SECURITY_PROTOCOL
+              value: {{ .Values.kafka.securityProtocol | default "SASL_PLAINTEXT" | quote }}
+            - name: JAVA_OPTS
+              value: "-XX:MaxRAMPercentage=50 -XX:+UseSerialGC"
+          {{- else }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "copsi.name" . }}-config
+          {{- end }}
+          ports:
+            {{- if eq .Values.component "frontend" }}
+            - containerPort: 8080
+              name: http
+            {{- else }}
+            - containerPort: 8080
+              name: http
+            - containerPort: 8081
+              name: metrics
+            {{- end }}
+          {{- if eq .Values.component "backend" }}
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8081
+            periodSeconds: 20
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8081
+            periodSeconds: 15
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8081
+            failureThreshold: 18
+            periodSeconds: 10
+          {{- else }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          {{- end }}
+          resources:
+            {{- if eq .Values.component "frontend" }}
+            {{- toYaml .Values.frontendResources | nindent 12 }}
+            {{- else }}
+            {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL

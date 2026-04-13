@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dltmanager
+description: Helm chart for ELPA DLT Manager (backend + frontend)
+type: application
+version: 0.1.0
+appVersion: "1.0.0-SNAPSHOT"
