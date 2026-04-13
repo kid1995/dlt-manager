@@ -1,11 +1,7 @@
-<si-button
-  si-variant="ghost"
-  [si-icon-only]="true"
-  [matTooltip]="'Refresh DLT overview data'"
-  (click)="loadData()"
-  (keyup)="loadData()"
->
-  <si-icon si-svg="functionalSync" si-sprite="navigation"></si-icon>
+<si-button si-variant="ghost" [si-icon-only]="true">
+  <button title="Refresh DLT overview data" [matTooltip]="'Refresh DLT overview data'" (click)="loadData()">
+    <si-icon si-svg="functionalSync" si-sprite="navigation"></si-icon>
+  </button>
 </si-button>
 
 <si-table
@@ -42,50 +38,41 @@ si-title="DLT Events Overview" [si-striped]="true">
           row.lastAdminAction?.status
         }}</si-table-cell>
         <si-table-cell>
-          <si-button
-            si-variant="ghost"
-            [si-icon-only]="true"
-            [attr.data-cy] ="'show-details-' + row.dltEventId"
-            [matTooltip]="'Show DLT event details'"
-            (click)="navigateToDetail(row.dltEventId)"
-            (keyup)="navigateToDetail(row.dltEventId)"
-          >
-            <si-icon
-              si-svg="functionalScale"
-              si-sprite="actions"
-            ></si-icon>
+          <si-button si-variant="ghost" [si-icon-only]="true">
+            <button
+              title="Show DLT event details"
+              [attr.data-cy]="'show-details-' + row.dltEventId"
+              [matTooltip]="'Show DLT event details'"
+              (click)="navigateToDetail(row.dltEventId)"
+            >
+              <si-icon si-svg="functionalScale" si-sprite="actions"></si-icon>
+            </button>
           </si-button>
 
           @for (action of row.availableActions; track action.name) {
             @switch (action.name) {
               @case ("Retry") {
-                <si-button
-                  si-variant="ghost"
-                  [si-icon-only]="true"
-                  [attr.data-cy] ="'retry-dlt-' + row.dltEventId"
-                  [matTooltip]="'Retry DLT event'"
-                  (click)="onTableRowActionClicked(action.name, row.dltEventId)"
-                  (keyup)="onTableRowActionClicked(action.name, row.dltEventId)"
-                >
-                  <si-icon
-                    si-svg="functionalRedo"
-                    si-sprite="actions"
-                  ></si-icon>
+                <si-button si-variant="ghost" [si-icon-only]="true">
+                  <button
+                    title="Retry DLT event"
+                    [attr.data-cy]="'retry-dlt-' + row.dltEventId"
+                    [matTooltip]="'Retry DLT event'"
+                    (click)="onTableRowActionClicked(action.name, row.dltEventId)"
+                  >
+                    <si-icon si-svg="functionalRedo" si-sprite="actions"></si-icon>
+                  </button>
                 </si-button>
               }
               @case ("Delete") {
-                <si-button
-                  si-variant="ghost"
-                  [si-icon-only]="true"
-                  [attr.data-cy] ="'delete-dlt-' + row.dltEventId"
-                  [matTooltip]="'Delete DLT event'"
-                  (click)="onTableRowActionClicked(action.name, row.dltEventId)"
-                  (keyup)="onTableRowActionClicked(action.name, row.dltEventId)"
-                >
-                  <si-icon
-                    si-svg="functionalDelete"
-                    si-sprite="actions"
-                  ></si-icon>
+                <si-button si-variant="ghost" [si-icon-only]="true">
+                  <button
+                    title="Delete DLT event"
+                    [attr.data-cy]="'delete-dlt-' + row.dltEventId"
+                    [matTooltip]="'Delete DLT event'"
+                    (click)="onTableRowActionClicked(action.name, row.dltEventId)"
+                  >
+                    <si-icon si-svg="functionalDelete" si-sprite="actions"></si-icon>
+                  </button>
                 </si-button>
               }
             }

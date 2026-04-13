@@ -3,14 +3,18 @@
 <div class="icon-bar">
   <div class="items-left">
     <a href="/dlt-event-overview">
-      <si-button si-variant="ghost" [si-icon-only]="true" [matTooltip]="'Back to DLT event overview'">
-        <si-icon si-svg="functionalArrowLeftBig" si-sprite="navigation" />
+      <si-button si-variant="ghost" [si-icon-only]="true">
+        <button title="Back to DLT event overview" [matTooltip]="'Back to DLT event overview'">
+          <si-icon si-svg="functionalArrowLeftBig" si-sprite="navigation"></si-icon>
+        </button>
       </si-button>
     </a>
   </div>
   <div class="items-right">
-    <si-button si-variant="ghost" [si-icon-only]="true" [matTooltip]="'Refresh DLT detail data'" (click)="refresh()">
-      <si-icon si-svg="functionalSync" si-sprite="navigation" />
+    <si-button si-variant="ghost" [si-icon-only]="true">
+      <button title="Refresh DLT detail data" [matTooltip]="'Refresh DLT detail data'" (click)="refresh()">
+        <si-icon si-svg="functionalSync" si-sprite="navigation"></si-icon>
+      </button>
     </si-button>
   </div>
 </div>

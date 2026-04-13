@@ -5,23 +5,23 @@
         ><si-header-logo></si-header-logo
       ></a>
       @if (isAuthenticated()) {
-        <a
-          title="Logout"
-          role="presentation"
-          (click)="logout()"
-          (keyup)="logout()"
-        >
-          <si-header-menu-item>
-            <si-icon
-              slot="icon"
-              si-width="24px"
-              si-height="24px"
-              si-svg="functionalLogin"
-              si-sprite="essentials"
-            ></si-icon>
-            <span slot="label">Logout</span>
-          </si-header-menu-item>
-        </a>
+        <si-header-menu>
+          <ul>
+            <li>
+              <si-header-menu-item si-text-visibility="all">
+                <a href="javascript:void(0)" title="Logout" (click)="logout()">
+                  <si-icon
+                    si-width="24px"
+                    si-height="24px"
+                    si-svg="functionalLogin"
+                    si-sprite="essentials"
+                  ></si-icon>
+                  Logout
+                </a>
+              </si-header-menu-item>
+            </li>
+          </ul>
+        </si-header-menu>
       }
     </si-header>
   </div>

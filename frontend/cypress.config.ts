@@ -11,8 +11,8 @@ export default defineConfig({
       numberOfTestData: 100,
       debugDelay: 1,
     },
-    viewportWidth: 4000,
-    viewportHeight: 4000,
+    viewportWidth: 1920,
+    viewportHeight: 1080,
     specPattern: 'cypress/components/**/*.cy.ts',
   },
 })

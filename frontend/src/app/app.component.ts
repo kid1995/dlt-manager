@@ -4,6 +4,7 @@ import { AuthService } from './services/auth/auth.service'
 import {
   SiHeaderNg,
   SiHeaderLogoNg,
+  SiHeaderMenuNg,
   SiHeaderMenuItemNg,
   SiIconNg,
 } from '@signal-iduna/ui-angular'
@@ -15,6 +16,7 @@ import {
     RouterOutlet,
     SiHeaderNg,
     SiHeaderLogoNg,
+    SiHeaderMenuNg,
     SiHeaderMenuItemNg,
     SiIconNg,
   ],

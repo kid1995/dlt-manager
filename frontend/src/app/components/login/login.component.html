@@ -4,12 +4,12 @@
   <si-button
     style="display:block; padding-top:var(--space-100);"
     si-variant="primary"
+    si-icon-align="right"
     class="submit-button"
-    data-slot="button-container"
-    (click)="onSubmit()"
-    (keyup)="onSubmit()"
     >
-    <span>Login with SSO</span>
+    <button (click)="onSubmit()">
+      <span>Login with SSO</span>
+    </button>
     <si-icon si-svg="functionalLogin" si-sprite="essentials" slot="icon-after"></si-icon>
   </si-button>
 </div>
