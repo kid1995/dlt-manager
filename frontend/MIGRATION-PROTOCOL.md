@@ -1,6 +1,6 @@
 # DLT Manager: Design System v3 → v5 Migration Protocol
 
-## Date: 2026-03-18
+## Date: 2026-03-18 (updated 2026-04-13)
 ## Status: ALL GREEN | Build PASS | Unit Tests 12/12 | Lint PASS | Audit 0 vulns | E2E 7/7
 
 ## Starting State
@@ -341,8 +341,138 @@ done
 
 ---
 
+## Post-Migration Fixes (2026-04-13)
+
+After the initial migration, several runtime issues were discovered and fixed:
+
+### Fix 1: v5 `si-button` Requires Inner `<button>` Element
+
+**Symptom:** Buttons rendered with no styling — just plain text.
+
+**Root cause:** v5 `si-button` is a wrapper web component that applies styles to a slotted native `<button>` inside it. Without the inner `<button>`, the web component has nothing to style.
+
+**Solution:** All `si-button` usages must wrap a native `<button>`:
+```html
+<!-- Text button -->
+<si-button si-variant="primary">
+  <button (click)="onSubmit()">
+    <span>Login with SSO</span>
+  </button>
+</si-button>
+
+<!-- Icon-only button (needs title for a11y) -->
+<si-button si-variant="ghost" [si-icon-only]="true">
+  <button title="Refresh" [matTooltip]="'Refresh'" (click)="refresh()">
+    <si-icon si-svg="functionalSync" si-sprite="navigation"></si-icon>
+  </button>
+</si-button>
+```
+
+**Key points:**
+- `(click)` handlers move to the inner `<button>`, not on `si-button`
+- Icon-only buttons need `title` and `aria-label` on the inner `<button>` for accessibility
+- `(keyup)` handlers are no longer needed — native `<button>` handles keyboard interaction
+- Verified against Storybook at http://localhost:4201/?path=/docs/komponenten-button-button--docs
+
+**Files changed:** `login.component.html`, `dlt-event-details.component.html`, `dlt-event-overview.component.html`
+
+### Fix 2: v5 `si-header` Needs `si-header-menu` Wrapper
+
+**Symptom:** Logout button had no styling in the header.
+
+**Root cause:** v5 `si-header-menu-item` must be inside a `<si-header-menu><ul><li>` structure, and the menu item itself must wrap an `<a>` anchor element.
+
+**Solution:**
+```html
+<si-header si-title="ELPA:4 DLT Admin UI">
+  <a href="/" slot="logo" aria-label="home">
+    <si-header-logo></si-header-logo>
+  </a>
+  <si-header-menu>
+    <ul>
+      <li>
+        <si-header-menu-item si-text-visibility="all">
+          <a href="javascript:void(0)" title="Logout" (click)="logout()">
+            <si-icon si-width="24px" si-height="24px" si-svg="functionalLogin" si-sprite="essentials"></si-icon>
+            Logout
+          </a>
+        </si-header-menu-item>
+      </li>
+    </ul>
+  </si-header-menu>
+</si-header>
+```
+
+**Additional import needed:** `SiHeaderMenuNg` in `app.component.ts`
+
+### Fix 3: Remove Wrapping Divs Around `si-header`
+
+**Symptom:** Header positioned incorrectly — shifted to the right instead of full-width at top.
+
+**Root cause:** `<main class="main"><div class="content">` wrapper constrained the web component's internal layout. v5 `si-header` manages its own full-width positioning.
+
+**Solution:** Removed wrapping elements — `si-header` is now a direct child of `app-root`.
+
+### Fix 4: Load `@signal-iduna/ui` as ES Module Import
+
+**Symptom:** `Uncaught SyntaxError: Unexpected token 'export'` in browser console.
+
+**Root cause:** v5 `@signal-iduna/ui/index.js` is an ES module (uses `export`), but `angular.json` `scripts` array loads files as classic `<script defer>` tags — not `<script type="module">`.
+
+**Solution:**
+- Removed from `angular.json`: `"scripts": ["node_modules/@signal-iduna/ui/index.js"]` → `"scripts": []`
+- Added to `src/main.ts`: `import '@signal-iduna/ui'`
+
+This bundles the web components through the Angular/Vite bundler as an ES module.
+
+**Note:** The initial migration doc stated "No more `import '@signal-iduna/ui'`" — this is true for individual component `.ts` files (the Angular proxies pull it in). But the global registration script still needs ONE entry point import, now in `main.ts` instead of `angular.json` scripts.
+
+### Fix 5: Sass `@import` → `@use`
+
+**Symptom:** Deprecation warning for `@import` in SCSS.
+
+**Solution:** `@import "@signal-iduna/ui/assets/styles/variables.scss"` → `@use "@signal-iduna/ui/assets/styles/variables.scss" as *`
+
+### Fix 6: Cypress Viewport No Longer Needs 4000x4000
+
+**Symptom:** Previous workaround required `viewportWidth: 4000, viewportHeight: 4000` to make tests pass.
+
+**Root cause:** Likely v3 table rendering or responsive behavior required oversized viewport. v5 components render properly at standard sizes.
+
+**Solution:** Changed to `viewportWidth: 1920, viewportHeight: 1080`. All 7 tests pass.
+
+---
+
+## Updated Common Gotchas (for other ELPA services migrating)
+
+### 10. `si-button` Must Wrap a Native `<button>` (STYLING LOSS)
+v5 `si-button` is a wrapper — without an inner `<button>`, you get unstyled text. Move `(click)` to the inner button. Remove `(keyup)` handlers.
+
+### 11. `si-header-menu-item` Must Contain `<a>` Inside `si-header-menu > ul > li`
+Header menu items need the full `<si-header-menu><ul><li><si-header-menu-item><a>` structure.
+
+### 12. Don't Wrap `si-header` in Layout Divs
+The web component manages its own full-width layout. Wrapping divs break positioning.
+
+### 13. `@signal-iduna/ui/index.js` Is ESM — Can't Use `angular.json` Scripts
+Move from `scripts` array to `import '@signal-iduna/ui'` in `main.ts`.
+
+---
+
+## Updated Step-by-Step Checklist
+
+Add these steps to the migration checklist:
+
+18. [ ] Wrap all `si-button` content in native `<button>` — move `(click)` to inner button
+19. [ ] Wrap `si-header-menu-item` in `si-header-menu > ul > li` structure with inner `<a>`
+20. [ ] Remove wrapping divs around `si-header`
+21. [ ] Move `@signal-iduna/ui` from `angular.json` scripts to `import` in `main.ts`
+22. [ ] Replace Sass `@import` with `@use ... as *`
+23. [ ] Reduce Cypress viewport to standard size (e.g., 1920x1080)
+
+---
+
 ## Remaining Warnings (non-blocking)
 
-1. **Sass @import deprecation** — `@import` in SCSS is deprecated (Dart Sass 3.0). Use `@use` instead.
-2. **Bundle size budget** — initial bundle exceeds 2MB limit by ~94KB
-3. **Component style budget** — `login.component.scss` exceeds 2KB limit
+1. **Bundle size budget** — initial bundle exceeds 2MB limit by ~94KB
+2. **Component style budget** — `login.component.scss` exceeds 2KB limit
