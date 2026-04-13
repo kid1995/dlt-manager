@@ -5,7 +5,7 @@ export const environment: AppConfig = {
   production: false,
   backendUrl: 'http://localhost:8080',
   oidc: {
-    issuer: 'http://localhost:8180/realms/lab',
+    issuer: 'https://employee.login.int.signal-iduna.org/',
     clientId: '8d12476c2684592b12515daab4ca0ddb72007118-E',
     showDebug: true,
     identityConfig: true,
