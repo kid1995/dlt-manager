@@ -7,8 +7,6 @@
     <title>Components App</title>
     <script>
       // Patch CustomElementRegistry.define to skip already-registered elements.
-      // @signal-iduna/ui registers all custom elements as side effects on import.
-      // Cypress's webpack bundler can trigger this multiple times.
       const originalDefine = customElements.define.bind(customElements);
       customElements.define = function(name, constructor, options) {
         if (customElements.get(name)) return;
