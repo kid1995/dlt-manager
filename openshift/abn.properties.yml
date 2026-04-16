@@ -35,7 +35,6 @@ objects:
       SERVICE_SYSTEM: "ABNAHME"
       LOGBACK_FILE: "logback-json.xml"
       PAPIERANTRAG_EINGANG_SERVICE_URL: "https://abn-papierantrageingang-elpa-pape-abn.cloud-test.system.local/api"
-      SWAGGER_ENABLED: "true"
       POSTGRES_HOST: "vipsiae11a.system.local"
       POSTGRES_DB_NAME: "elpapga"
       FLYWAY_ENABLED: "true"

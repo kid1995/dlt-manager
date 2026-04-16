@@ -108,7 +108,7 @@ node {
 						si_npm.ciBuildProject("prd", APP_FRONTEND_FOLDER)
         }
         stage("Verify") {
-            si_java.check(PROJECT_ROOT_FOLDER, 10, 10, 10)
+            si_java.check(PROJECT_ROOT_FOLDER)
 
 						si_npm.ciTest(APP_FRONTEND_FOLDER)
 

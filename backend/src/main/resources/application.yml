@@ -136,6 +136,10 @@ management:
     metrics:
       export:
         enabled: true
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 topics:
   elpa-dlt: elpa-dlt
@@ -143,10 +147,6 @@ topics:
 springdoc:
   api-docs:
     path: /api-docs
-  swagger-ui:
-    enabled: ${SWAGGER_ENABLED:false}
-    path: /docs/rest
-    operations-sorter: method
   paths-to-exclude: /springwolf/**
 
 springwolf:

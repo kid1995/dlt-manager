@@ -1,175 +1,184 @@
 buildscript {
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        maven {
+            url 'https://m2repo.system.local/content/groups/full/'
+        }
+    }
 
-	dependencies {
-		// update requires scheme update in sda-dependencycheck.system.local
-		classpath 'org.postgresql:postgresql:42.7.10'// this is necessary for owasp dependency check
-	}
+    dependencies {
+        // update requires scheme update in sda-dependencycheck.system.local
+        classpath 'org.postgresql:postgresql:42.7.10'// this is necessary for owasp dependency check
+    }
 }
 
 plugins {
-	id 'idea'
-	id 'jacoco'
-	id 'org.sonarqube' version '7.2.3.7755'
-	id 'org.owasp.dependencycheck' version '12.1.6'
-	id 'org.springframework.boot' version '4.0.3'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id("org.openrewrite.rewrite") version("latest.release")
+    id 'idea'
+    id 'jacoco'
+    id 'org.sonarqube' version '7.2.3.7755'
+    id 'org.owasp.dependencycheck' version '12.1.6'
+    id 'org.springframework.boot' version '4.0.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id("org.openrewrite.rewrite") version("latest.release")
 }
 
 
 rewrite {
-	activeRecipe("de.signaliduna.elpa.UpgradeToSpringBoot4")
-	setExportDatatables(true)
-	configFile = file("open-rewrite/rewrite.yml")
+    activeRecipe("de.signaliduna.elpa.UpgradeToSpringBoot4")
+    setExportDatatables(true)
+    configFile = file("open-rewrite/rewrite.yml")
 }
 
 
 ext {
-	set('springCloudVersion', "2025.1.1")
-	set('cloudeventsVersion', "4.0.1")
+    set('springCloudVersion', "2025.1.1")
+    set('cloudeventsVersion', "4.0.2")
 }
 
 allprojects {
-	group = 'de.signaliduna.elpa.dlt-manager'
+    group = 'de.signaliduna.elpa.dlt-manager'
 
-	repositories {
-		mavenLocal()
-		mavenCentral()
-	}
+    repositories {
+        maven {
+            url "https://m2repo.system.local/content/groups/full/"
+        }
+        mavenCentral()
+    }
 }
 
 LinkedHashSet jacocoSet = new LinkedHashSet()
 
 dependencies {
-	rewrite("org.openrewrite.recipe:rewrite-spring:6.26.0")
-	rewrite("org.openrewrite.recipe:rewrite-jackson:1.18.0")
-	rewrite("org.openrewrite.recipe:rewrite-testing-frameworks:3.29.0")
+	rewrite("org.openrewrite.recipe:rewrite-spring:6.29.0")
+	rewrite("org.openrewrite.recipe:rewrite-jackson:1.21.1")
+	rewrite("org.openrewrite.recipe:rewrite-testing-frameworks:3.34.0")
 }
 
 subprojects {
-	apply plugin: 'java'
-	apply plugin: 'idea'
-	apply plugin: 'jacoco'
-	apply plugin: 'org.springframework.boot'
-	apply plugin: 'io.spring.dependency-management'
-	apply plugin: 'org.sonarqube'
-	apply plugin: 'org.owasp.dependencycheck'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.sonarqube'
+    apply plugin: 'org.owasp.dependencycheck'
 
-	java {
-		withSourcesJar()
-		sourceCompatibility = JavaVersion.VERSION_21
-	}
+    java {
+        withSourcesJar()
+        sourceCompatibility = JavaVersion.VERSION_21
+    }
 
 
-	test {
-		useJUnitPlatform()
-	}
+    test {
+        useJUnitPlatform()
+    }
 
-	jacoco {
-		toolVersion = "0.8.14"
-		reportsDirectory = layout.buildDirectory.dir("jacoco")
-	}
+    jacoco {
+        toolVersion = "0.8.14"
+        reportsDirectory = layout.buildDirectory.dir("jacoco")
+    }
 
-	jacocoTestReport {
-		dependsOn test
-		getExecutionData().setFrom(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
-		reports {
-			xml.required = true
-			csv.required = false
-			html.required = false
-		}
-	}
+    jacocoTestReport {
+        dependsOn test
+        getExecutionData().setFrom(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = false
+        }
+    }
 
-	jacocoTestCoverageVerification {
-		dependsOn jacocoTestReport
-		violationRules {
-			rule {
-				enabled = true
-				element = 'CLASS'
-				excludes = ['de.signaliduna.dltmanager.**.model.*']
-				limit {
-					counter = 'BRANCH'
-					value = 'COVEREDRATIO'
-					minimum = 1.0
-				}
-			}
-		}
-	}
+    jacocoTestCoverageVerification {
+        dependsOn jacocoTestReport
+        violationRules {
+            rule {
+                enabled = true
+                element = 'CLASS'
+                // Schließt alle Klassen in einem beliebigen 'model'-Paket aus.
+                excludes = [
+                        'de.signaliduna.dltmanager.**.model.*'
+                ]
+                limit {
+                    // Behält die ursprüngliche Regel bei, die eine 100%ige Branch-Abdeckung für die übrigen Klassen fordert.
+                    counter = 'BRANCH'
+                    value = 'COVEREDRATIO'
+                    minimum = 1.0
+                }
+            }
+        }
+    }
 
-	jacocoSet.addAll(
-		tasks.findAll({ it.name.contains('jacocoTestReport') || it.name == 'test' })
-	)
 
-	tasks.named('test') {
-		useJUnitPlatform()
-		finalizedBy jacocoTestReport
-		jvmArgs("-XX:+EnableDynamicAgentLoading")
-	}
+    jacocoSet.addAll(
+            tasks.findAll({ it.name.contains('jacocoTestReport') || it.name == 'test' })
+    )
 
-	check.dependsOn jacocoTestCoverageVerification
-	dependencyCheck {
-		outputDirectory = layout.buildDirectory.asFile.get().path + "/reports/dependencycheck"
-		format = "XML"
-		autoUpdate = false
-		failOnError = false
-		suppressionFiles = [
-			rootProject.projectDir.toString() + '/dev-setup/suppressed-cves.xml',
-			"https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster"
-		]
-		data.connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
-		data.driver = "org.postgresql.Driver"
-		data.username = "ZA-SVC-DEPCHK-P"
-		data.password = "QPmWX.CZ4hbJRtU"
-		data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
-		analyzers.centralEnabled = false
-		analyzers.nexusEnabled = false
-	}
+    tasks.named('test') {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+        jvmArgs("-XX:+EnableDynamicAgentLoading")
+    }
+
+    check.dependsOn jacocoTestCoverageVerification
+    dependencyCheck {
+        outputDirectory = layout.buildDirectory.asFile.get().path + "/reports/dependencycheck"
+        format = "XML"
+        autoUpdate = false
+        failOnError = false
+        suppressionFiles = [
+                "https://git.system.local/projects/SDA/repos/global-cve-suppression/raw/global-suppressed-cves.xml?at=refs%2Fheads%2Fmaster",
+                "https://git.system.local/projects/ELPA/repos/elpa-cve-suppression/raw/suppressed-cves.xml?at=refs%2Fheads%2Fmain"
+        ]
+        data.connectionString = "jdbc:postgresql://vipsiae11p.system.local:5432/depchkp?currentSchema=v12"
+        data.driver = "org.postgresql.Driver"
+        data.username = "ZA-SVC-DEPCHK-P"
+        data.password = "QPmWX.CZ4hbJRtU"
+        data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
+        analyzers.centralEnabled = false
+        analyzers.nexusEnabled = false
+    }
 }
 
 rootProject.tasks.sonarqube.dependsOn = jacocoSet
 
 sonarqube {
-	properties {
-		property "sonar.sourceEncoding", "UTF-8"
-		property "sonar.coverage.exclusions", "**/model/*.*"
-		property "sonar.cpd.exclusions", "**/model/*.*, **/mongo-init/*.js"
-	}
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.coverage.exclusions", "**/model/*.*"
+        property "sonar.cpd.exclusions", "**/model/*.*"
+    }
 }
 
 tasks.register('printVersion') {
-	println(version)
+    println(version)
 }
 
 final String SNAPSHOT_SUFFIX = "-SNAPSHOT"
 final String GRADLE_PROPERTIES_FILE_NAME = "gradle.properties"
 
 tasks.register('removeSnapshot', WriteProperties) {
-	destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-	def newVersion = version.replace(SNAPSHOT_SUFFIX, "")
-	println('new version: ' + newVersion)
-	property('version', newVersion)
+    destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
+    def newVersion = version.replace(SNAPSHOT_SUFFIX, "")
+    println('new version: ' + newVersion)
+    property('version', newVersion)
 }
 
 tasks.register('increasePatchVersion', WriteProperties) {
-	destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-	println('old version: ' + version)
-	def versionStr = version as String
-	boolean isSnapshot = versionStr.endsWith(SNAPSHOT_SUFFIX)
-	def versionNo = (isSnapshot) ? versionStr.replace(SNAPSHOT_SUFFIX, "") : versionStr
-	def splitVersion = versionNo.split("\\.")
-	def patchVersion = Integer.valueOf(splitVersion[2]).intValue() + 1
-	def newVersion = String.format('%s.%s.%d', splitVersion[0], splitVersion[1], patchVersion) + ((isSnapshot) ? SNAPSHOT_SUFFIX : "")
-	println('new version: ' + newVersion)
-	property('version', newVersion)
+    destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
+    println('old version: ' + version)
+    def versionStr = version as String
+    boolean isSnapshot = versionStr.endsWith(SNAPSHOT_SUFFIX)
+    def versionNo = (isSnapshot) ? versionStr.replace(SNAPSHOT_SUFFIX, "") : versionStr
+    def splitVersion = versionNo.split("\\.")
+    def patchVersion = Integer.valueOf(splitVersion[2]).intValue() + 1
+    def newVersion = String.format('%s.%s.%d', splitVersion[0], splitVersion[1], patchVersion) + ((isSnapshot) ? SNAPSHOT_SUFFIX : "")
+    println('new version: ' + newVersion)
+    property('version', newVersion)
 }
 
 tasks.register('addSnapshot', WriteProperties) {
-	destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-	def newVersion = version + SNAPSHOT_SUFFIX
-	println('new version: ' + newVersion)
-	property('version', newVersion)
+    destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
+    def newVersion = version + SNAPSHOT_SUFFIX
+    println('new version: ' + newVersion)
+    property('version', newVersion)
 }
 
