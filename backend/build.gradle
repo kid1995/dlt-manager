@@ -55,8 +55,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
 
     // others
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-    implementation 'io.github.springwolf:springwolf-kafka:2.1.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:3.0.3'
+    implementation 'io.github.springwolf:springwolf-kafka:2.2.0'
     implementation "com.c4-soft.springaddons:spring-addons-starter-oidc:${springaddonsOidcVersion}"
     implementation("io.cloudevents:cloudevents-spring:${cloudeventsVersion}")
     implementation("io.cloudevents:cloudevents-json-jackson:${cloudeventsVersion}")
