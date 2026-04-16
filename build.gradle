@@ -67,17 +67,12 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_21
     }
 
-
-    test {
-        useJUnitPlatform()
-    }
-
     jacoco {
         toolVersion = "0.8.14"
         reportsDirectory = layout.buildDirectory.dir("jacoco")
     }
 
-    jacocoTestReport {
+    tasks.named('jacocoTestReport') {
         dependsOn test
         getExecutionData().setFrom(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
         reports {
@@ -87,7 +82,7 @@ subprojects {
         }
     }
 
-    jacocoTestCoverageVerification {
+    tasks.named('jacocoTestCoverageVerification') {
         dependsOn jacocoTestReport
         violationRules {
             rule {
@@ -109,7 +104,7 @@ subprojects {
 
 
     jacocoSet.addAll(
-            tasks.findAll({ it.name.contains('jacocoTestReport') || it.name == 'test' })
+            tasks.matching { it.name.contains('jacocoTestReport') || it.name == 'test' }
     )
 
     tasks.named('test') {
@@ -118,7 +113,10 @@ subprojects {
         jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 
-    check.dependsOn jacocoTestCoverageVerification
+    tasks.named('check') {
+        dependsOn jacocoTestCoverageVerification
+    }
+
     dependencyCheck {
         outputDirectory = layout.buildDirectory.asFile.get().path + "/reports/dependencycheck"
         format = "XML"
@@ -132,13 +130,15 @@ subprojects {
         data.driver = "org.postgresql.Driver"
         data.username = "ZA-SVC-DEPCHK-P"
         data.password = "QPmWX.CZ4hbJRtU"
-        data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get()
+        data.directory = rootProject.layout.buildDirectory.dir("owasp-data").get().asFile.path
         analyzers.centralEnabled = false
         analyzers.nexusEnabled = false
     }
 }
 
-rootProject.tasks.sonarqube.dependsOn = jacocoSet
+tasks.named('sonarqube') {
+    dependsOn jacocoSet
+}
 
 sonarqube {
     properties {
@@ -149,7 +149,9 @@ sonarqube {
 }
 
 tasks.register('printVersion') {
-    println(version)
+    doLast {
+        println(version)
+    }
 }
 
 final String SNAPSHOT_SUFFIX = "-SNAPSHOT"
@@ -157,28 +159,34 @@ final String GRADLE_PROPERTIES_FILE_NAME = "gradle.properties"
 
 tasks.register('removeSnapshot', WriteProperties) {
     destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-    def newVersion = version.replace(SNAPSHOT_SUFFIX, "")
-    println('new version: ' + newVersion)
+    def newVersion = version.toString().replace(SNAPSHOT_SUFFIX, "")
     property('version', newVersion)
+    doLast {
+        println("new version: ${newVersion}")
+    }
 }
 
 tasks.register('increasePatchVersion', WriteProperties) {
     destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-    println('old version: ' + version)
-    def versionStr = version as String
+    def versionStr = version.toString()
     boolean isSnapshot = versionStr.endsWith(SNAPSHOT_SUFFIX)
     def versionNo = (isSnapshot) ? versionStr.replace(SNAPSHOT_SUFFIX, "") : versionStr
     def splitVersion = versionNo.split("\\.")
     def patchVersion = Integer.valueOf(splitVersion[2]).intValue() + 1
     def newVersion = String.format('%s.%s.%d', splitVersion[0], splitVersion[1], patchVersion) + ((isSnapshot) ? SNAPSHOT_SUFFIX : "")
-    println('new version: ' + newVersion)
     property('version', newVersion)
+    doLast {
+        println("old version: ${versionStr}")
+        println("new version: ${newVersion}")
+    }
 }
 
 tasks.register('addSnapshot', WriteProperties) {
     destinationFile = file(GRADLE_PROPERTIES_FILE_NAME)
-    def newVersion = version + SNAPSHOT_SUFFIX
-    println('new version: ' + newVersion)
+    def newVersion = "${version}${SNAPSHOT_SUFFIX}"
     property('version', newVersion)
+    doLast {
+        println("new version: ${newVersion}")
+    }
 }
 
