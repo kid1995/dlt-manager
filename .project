@@ -2,9 +2,21 @@
 <projectDescription>
 	<name>dlt-manager</name>
 	<comment></comment>
-	<projects/>
-	<natures/>
-	<buildSpec/>
-	<linkedResources/>
-	<filteredResources/>
+	<projects>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+	</natures>
+	<filteredResources>
+		<filter>
+			<id>1776109371763</id>
+			<name></name>
+			<type>30</type>
+			<matcher>
+				<id>org.eclipse.core.resources.regexFilterMatcher</id>
+				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>

@@ -3,7 +3,13 @@
     "allow": [
       "Bash(./gradlew compileJava compileTestJava)",
       "Bash(ls /Users/thekietdang/Downloads/github-buffer/dlt-manager/gradlew /Users/thekietdang/Downloads/github-buffer/dlt-manager/backend/pom.xml /Users/thekietdang/Downloads/github-buffer/dlt-manager/backend/build.gradle* /Users/thekietdang/Downloads/github-buffer/dlt-manager/build.gradle*)",
-      "Bash(./gradlew :backend:compileJava :backend:compileTestJava)"
+      "Bash(./gradlew :backend:compileJava :backend:compileTestJava)",
+      "Read(//Users/thekietdang/Downloads/**)",
+      "Read(//Users/thekietdang/**)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ]
   }
 }
